@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import SearchInput from './components/SearchInput';
-import { fetchPhotosByTags } from './utils';
+import React, { useState, useEffect, useCallback } from 'react';
+import { fetchDictWordsByTag } from './utils';
 import './App.css';
 
 const galleryMachine = {
@@ -25,28 +24,18 @@ const galleryMachine = {
 };
 
 function App() {
-  const [galleryState, setGalleryState] = useState('gallery');
-  // const [query, setQuery] = useState('');
+  const SEARCH_TEXT = {
+    loading: 'Searching...',
+    error: 'Try search again',
+    start: 'Search',
+  };
+  const [galleryState, setGalleryState] = useState('start');
+  const [query, setQuery] = useState('');
   const [context, setContext] = useState({
     items: [],
-    query: '',
   });
 
-  function transition(action) {
-    const currentGalleryState = galleryState;
-    const nextGalleryState = galleryMachine[currentGalleryState][action.type];
-
-    if (nextGalleryState) {
-      const nextContext = service(nextGalleryState, action);
-      setGalleryState(nextGalleryState);
-      setContext({
-        ...context,
-        ...nextContext,
-      });
-    }
-  }
-
-  function service(nextState, action) {
+  function send(nextState, action) {
     switch (nextState) {
       case 'loading':
         search(action.query);
@@ -66,35 +55,68 @@ function App() {
     }
   }
 
-  function search(query) {
-    const encodedQuery = encodeURIComponent(query);
+  function transition(action) {
+    const currentGalleryState = galleryState;
+    const nextGalleryState = galleryMachine[currentGalleryState][action.type];
+    console.log('[transition]', action, currentGalleryState, nextGalleryState);
+    if (nextGalleryState) {
+      const nextContext = send(nextGalleryState, action);
+      setGalleryState(nextGalleryState);
+      setContext({
+        ...context,
+        ...nextContext,
+      });
+    }
+  }
 
-    setTimeout(() => {
-      fetchPhotosByTags(encodedQuery)
-        .then(data => {
-          transition({ type: 'SEARCH_SUCCESS', items: data.items });
-        })
-        .catch(error => {
-          transition({ type: 'SEARCH_FAILURE', error });
-        });
-    }, 1000);
+  function search(tag) {
+    fetchDictWordsByTag(tag)
+      .then(res => {
+        transition({ type: 'SEARCH_SUCCESS', items: res.data });
+      })
+      .catch(err => {
+        transition({ type: 'SEARCH_FAILURE' });
+      });
+  }
+
+  function handleCancel(e) {
+    transition({ type: 'CANCEL_SEARCH' });
+  }
+
+  function handleSubmit(e) {
+    e.persist();
+    e.preventDefault();
+    transition({ type: 'SEARCH', query });
+  }
+
+  function handleInput(e) {
+    setQuery(e.target.value);
   }
 
   return (
     <div className="App">
       <div className="form-container">
-        <SearchInput
-          onSearch={text => {
-            transition({
-              type: 'SEARCH',
-              query: text,
-            });
-          }}
+        <input
+          type="text"
+          placeholder="Search For Words"
+          onChange={handleInput}
         />
+        <button className="btn-search" onClick={handleSubmit}>
+          {SEARCH_TEXT[galleryState] || 'Search'}
+        </button>
+        {galleryState === 'loading' && (
+          <button className="btn-cancel" onClick={handleCancel}>
+            Cancel
+          </button>
+        )}
       </div>
-      <div className="gallery-container">
+      <div className="words-container">
+        {context.items.map(item => (
+          <div className="word-card">{item}</div>
+        ))}
+      </div>
 
-      </div>
+      <p className="current-state">Current state: {galleryState}</p>
     </div>
   );
 }

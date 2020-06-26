@@ -1,8 +1,20 @@
-import fetchJsonp from 'fetch-jsonp';
+const DATABASE = {
+  a: ['abandon', 'apple', 'appear', 'abide', 'able'],
+  b: ['book', 'bread', 'beef'],
+  c: ['card', 'cook', 'chicken']
+};
 
-export function fetchPhotosByTags(tags) {
-  fetchJsonp(
-    `https://api.flickr.com/services/feeds/photos_public.gne?lang=en-us&format=json&tags=${tags}`,
-    { jsonpCallback: 'jsoncallback' })
-    .then(res => res.json())
+export function sleep(t = 1000) {
+  return new Promise(r => setTimeout(r, t));
+}
+
+export async function fetchDictWordsByTag(tag, delay = 1000) {
+  await sleep(delay);
+
+  // mock random error
+  if (Math.random() > .3) {
+    return { data: DATABASE[tag] };
+  } else {
+    throw new Error({ data: null, error: 'Server error, please retry later' })
+  }
 }
