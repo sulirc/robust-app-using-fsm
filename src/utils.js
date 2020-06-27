@@ -16,7 +16,9 @@ class Database {
       a: ['abandon', 'apple', 'appear', 'abide', 'able'],
       b: ['book', 'bread', 'beef'],
       c: ['card', 'cook', 'chicken'],
-      d: ['dog', 'dock', 'dragon', 'direct', 'distance']
+      d: ['dog', 'dock', 'dragon', 'direct', 'distance'],
+      // default
+      _: ['default']
     };
 
     Object.keys(data).forEach(key => {
@@ -27,7 +29,7 @@ class Database {
   }
 
   get(key) {
-    return this.db[key];
+    return this.db[key] || this.db['_'];
   }
 }
 
@@ -42,16 +44,16 @@ export function sleep(t = 1000) {
 }
 
 function isServerNormal() {
-  return Math.random() > .1;
+  return Math.random() > .5;
 }
 
-export async function fetchDictWordsByTag(tag, delay = 1000) {
+export async function fetchDictWordsByTag(tag, delay = 2000) {
+  console.info('try fetching...', new Date())
   await sleep(delay);
 
   if (isServerNormal()) {
     return { data: DATABASE.get(tag) };
   } else {
-    throw new Error({ data: null, error: 'Server error, please retry later' })
+    throw new Error('Server error, please retry later');
   }
 }
-

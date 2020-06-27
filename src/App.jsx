@@ -79,6 +79,7 @@ function App() {
         transition({ type: 'SEARCH_SUCCESS', items: res.data });
       })
       .catch(err => {
+        console.error(err);
         transition({ type: 'SEARCH_FAILURE' });
       });
   }
@@ -119,6 +120,7 @@ function App() {
           </button>
         )}
       </div>
+      {galleryState === 'loading' && <p className="loading-spin">Loading...</p>}
       <div className="words-container">
         {context.items.map(item => (
           <div className="word-card" key={item.id}>
