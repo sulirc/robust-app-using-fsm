@@ -35,7 +35,10 @@ function App() {
   const [query, setQuery] = useState('');
   const [context, setContext] = useState({
     items: [],
+    photo: {},
   });
+
+  console.log(context);
 
   function send(nextState, action) {
     switch (nextState) {
@@ -89,9 +92,15 @@ function App() {
   }
 
   function handleSubmit(e) {
-    e.persist();
-    e.preventDefault();
     transition({ type: 'SEARCH', query });
+  }
+
+  function handleItemSelect(item) {
+    transition({ type: 'SELECT_PHOTO', item });
+  }
+
+  function handleItemUnselect() {
+    transition({ type: 'EXIT_PHOTO', item: {} });
   }
 
   function handleInput(e) {
@@ -121,13 +130,30 @@ function App() {
         )}
       </div>
       {galleryState === 'loading' && <p className="loading-spin">Loading...</p>}
-      <div className="words-container">
-        {context.items.map(item => (
-          <div className="word-card" key={item.id}>
-            {item.title}
+      {galleryState === 'gallery' && (
+        <div className="words-container">
+          {context.items.map(item => (
+            <div
+              className="word-card"
+              key={item.id}
+              onClick={() => handleItemSelect(item)}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+      {galleryState === 'photo' && (
+        <div className="zoom-container">
+          <div
+            className="word-full-card"
+            onClick={() => handleItemUnselect()}
+          >
+            <p className="title">{context.photo.title}</p>
+            <p className="desc">{context.photo.descriptions}</p>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       <p className="current-state">Current state: {galleryState}</p>
     </div>

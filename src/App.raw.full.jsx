@@ -31,24 +31,21 @@ function RawFullApp() {
     setIsError(false);
     setIsLoading(true);
     setIsCanceled(false);
-    fetchDictWordsByTag(query)
-      .then(res => {
-        // console.log('boolean flags', isError, isLoading, isCanceled);
-        if (booleanRef.current.isCanceled) {
-          return;
-        }
-        setIsLoading(false);
-        setIsError(false);
-        setItems(res.data || []);
-      })
-      .catch(err => {
-        if (booleanRef.current.isCanceled) {
-          return;
-        }
-        console.error(err);
-        setIsLoading(false);
-        setIsError(true);
-      });
+    fetchDictWordsByTag(query).then(res => {
+      if (booleanRef.current.isCanceled) {
+        return;
+      }
+      setIsLoading(false);
+      setIsError(false);
+      setItems(res.data || []);
+    }).catch(err => {
+      if (booleanRef.current.isCanceled) {
+        return;
+      }
+      console.error(err);
+      setIsLoading(false);
+      setIsError(true);
+    });
   }
 
   function handleCancel(e) {

@@ -14,21 +14,16 @@ function RawApp() {
   }
 
   function handleSubmit(e) {
-    e.persist();
-    e.preventDefault();
-
     setIsError(false);
     setIsLoading(true);
-    fetchDictWordsByTag(query)
-      .then(res => {
+    fetchDictWordsByTag(query).then(res => {
         setIsLoading(false);
         setItems(res.data || []);
-      })
-      .catch(err => {
-        console.error(err);
-        setIsLoading(false);
-        setIsError(true);
-      });
+    }).catch(err => {
+      console.error(err);
+      setIsLoading(false);
+      setIsError(true);
+    });
   }
 
   return (
@@ -50,7 +45,7 @@ function RawApp() {
             })}
             onClick={handleSubmit}
           >
-            { isLoading ? 'Searching...' : 'Search' }
+            {isLoading ? 'Searching...' : 'Search'}
           </button>
         )}
       </div>

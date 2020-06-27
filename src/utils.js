@@ -4,9 +4,10 @@ class Database {
     this.create();
   }
 
-  mapWithId(array) {
+  queryMore(array) {
     return array.map(a => ({
       title: a,
+      descriptions: 'Browser extensions give people a way to take control of how they experience the web. This week Apple has announced that Safari is adopting a web-based API for browser extensions similar to Firefox’s WebExtensions API, making it easy to build once and run in multiple browsers. Developers can get started',
       id: createId()
     }))
   }
@@ -22,7 +23,7 @@ class Database {
     };
 
     Object.keys(data).forEach(key => {
-      data[key] = this.mapWithId(data[key]);
+      data[key] = this.queryMore(data[key]);
     });
 
     this.db = data;
@@ -44,7 +45,7 @@ export function sleep(t = 1000) {
 }
 
 function isServerNormal() {
-  return Math.random() > .5;
+  return Math.random() > 0;
 }
 
 export async function fetchDictWordsByTag(tag, delay = 2000) {

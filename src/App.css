@@ -17,7 +17,7 @@
 .form-container > button {
   border: 1px solid #888;
   color: #444;
-  background: #FFF;
+  background: #fff;
   outline: none;
   margin-left: 6px;
 }
@@ -64,10 +64,11 @@
   padding: 10px 40px;
   min-height: 60px;
   font-size: 24px;
-  background: #EEE;
+  background: #eee;
   font-family: serif;
   font-style: italic;
   border: 1px solid #888;
+  cursor: pointer;
 }
 
 .word-card + .word-card {
@@ -77,6 +78,26 @@
 .word-card:nth-child(2n) {
   flex-grow: 1;
 }
+
+.word-full-card {
+  margin: 10px;
+  background: #eee;
+  border: 1px solid #aaa;
+  padding: 10px 20px;
+  font-family: serif;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.word-full-card > .title {
+  margin: 10px 0;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.word-full-card > .desc {
+  font-size: 16px;
+} 
 
 .loading-spin {
   text-align: center;
