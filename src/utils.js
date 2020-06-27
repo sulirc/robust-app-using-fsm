@@ -1,23 +1,55 @@
-const DATABASE = {
-  a: ['abandon', 'apple', 'appear', 'abide', 'able'],
-  b: ['book', 'bread', 'beef'],
-  c: ['card', 'cook', 'chicken']
-};
+class Database {
+  constructor() {
+    this.db = Object.create(null);
+    this.create();
+  }
 
-export function generateId() {
-  
+  mapWithId(array) {
+    return array.map(a => ({
+      title: a,
+      id: createId()
+    }))
+  }
+
+  create() {
+    const data = {
+      a: ['abandon', 'apple', 'appear', 'abide', 'able'],
+      b: ['book', 'bread', 'beef'],
+      c: ['card', 'cook', 'chicken'],
+      d: ['dog', 'dock', 'dragon', 'direct', 'distance']
+    };
+
+    Object.keys(data).forEach(key => {
+      data[key] = this.mapWithId(data[key]);
+    });
+
+    this.db = data;
+  }
+
+  get(key) {
+    return this.db[key];
+  }
+}
+
+const DATABASE = new Database();
+
+export function createId() {
+  return Math.random().toString(16).slice(2, 10);
 }
 
 export function sleep(t = 1000) {
   return new Promise(r => setTimeout(r, t));
 }
 
+function isServerNormal() {
+  return Math.random() > .1;
+}
+
 export async function fetchDictWordsByTag(tag, delay = 1000) {
   await sleep(delay);
 
-  // mock random error
-  if (Math.random() > .3) {
-    return { data: DATABASE[tag] };
+  if (isServerNormal()) {
+    return { data: DATABASE.get(tag) };
   } else {
     throw new Error({ data: null, error: 'Server error, please retry later' })
   }

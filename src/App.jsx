@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 import useEventCallback from './useEventCallback';
+import classNames from 'classnames';
 import { fetchDictWordsByTag } from './utils';
 import './App.css';
-
 
 const galleryMachine = {
   start: {
@@ -105,7 +105,12 @@ function App() {
           placeholder="Search For Words"
           onChange={handleInput}
         />
-        <button className="btn-search" onClick={handleSubmit}>
+        <button
+          className={classNames('btn-search', {
+            'is-loading': galleryState === 'loading',
+          })}
+          onClick={handleSubmit}
+        >
           {SEARCH_TEXT[galleryState] || 'Search'}
         </button>
         {galleryState === 'loading' && (
@@ -115,9 +120,9 @@ function App() {
         )}
       </div>
       <div className="words-container">
-        {context.items.map((item, key) => (
-          <div className="word-card" key={key}>
-            {item}
+        {context.items.map(item => (
+          <div className="word-card" key={item.id}>
+            {item.title}
           </div>
         ))}
       </div>
