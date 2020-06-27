@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import useEventCallback from './useEventCallback';
 import { fetchDictWordsByTag } from './utils';
 import './App.css';
+
 
 const galleryMachine = {
   start: {
@@ -55,19 +57,21 @@ function App() {
     }
   }
 
-  function transition(action) {
-    const currentGalleryState = galleryState;
-    const nextGalleryState = galleryMachine[currentGalleryState][action.type];
-    console.log('[transition]', action, currentGalleryState, nextGalleryState);
-    if (nextGalleryState) {
-      const nextContext = send(nextGalleryState, action);
-      setGalleryState(nextGalleryState);
-      setContext({
-        ...context,
-        ...nextContext,
-      });
-    }
-  }
+  const transition = useEventCallback(
+    action => {
+      const currentGalleryState = galleryState;
+      const nextGalleryState = galleryMachine[currentGalleryState][action.type];
+      if (nextGalleryState) {
+        const nextContext = send(nextGalleryState, action);
+        setGalleryState(nextGalleryState);
+        setContext({
+          ...context,
+          ...nextContext,
+        });
+      }
+    },
+    [galleryState]
+  );
 
   function search(tag) {
     fetchDictWordsByTag(tag)
@@ -111,8 +115,10 @@ function App() {
         )}
       </div>
       <div className="words-container">
-        {context.items.map(item => (
-          <div className="word-card">{item}</div>
+        {context.items.map((item, key) => (
+          <div className="word-card" key={key}>
+            {item}
+          </div>
         ))}
       </div>
 

@@ -4,6 +4,10 @@ const DATABASE = {
   c: ['card', 'cook', 'chicken']
 };
 
+export function generateId() {
+  
+}
+
 export function sleep(t = 1000) {
   return new Promise(r => setTimeout(r, t));
 }
@@ -18,3 +22,4 @@ export async function fetchDictWordsByTag(tag, delay = 1000) {
     throw new Error({ data: null, error: 'Server error, please retry later' })
   }
 }
+
