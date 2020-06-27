@@ -16,6 +16,7 @@
 
 .form-container > button {
   border: 1px solid #888;
+  color: #444;
   background: #FFF;
   outline: none;
   margin-left: 6px;
@@ -29,6 +30,8 @@
 
 .form-container > button.is-loading {
   cursor: not-allowed;
+  border: 1px solid #888;
+  color: #444;
   opacity: 0.5;
 }
 
@@ -50,6 +53,7 @@
 
 .words-container {
   display: flex;
+  justify-content: center;
 }
 
 .word-card {
@@ -67,4 +71,10 @@
 
 .word-card:nth-child(2n) {
   flex-grow: 1;
+}
+
+.loading-spin {
+  text-align: center;
+  font-size: 16px;
+  color: #444;
 }

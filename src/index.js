@@ -1,11 +1,19 @@
+/* eslint-disable */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+// Normal demo
+import AppRaw from './App.raw';
+// Normal full demo
+import AppRawFull from './App.raw.full';
+// FSM demo
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
-  <App />,
+  // <AppRaw />,
+  <AppRawFull />,
+  // <App />,
   document.getElementById('root')
 );
 

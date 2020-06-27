@@ -119,6 +119,7 @@ function App() {
           </button>
         )}
       </div>
+      {galleryState === 'loading' && <p className="loading-spin">Loading...</p>}
       <div className="words-container">
         {context.items.map(item => (
           <div className="word-card" key={item.id}>
