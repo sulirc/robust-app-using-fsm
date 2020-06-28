@@ -12,8 +12,8 @@ import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   // <AppRaw />,
-  // <AppRawFull />,
-  <App />,
+  <AppRawFull />,
+  // <App />,
   document.getElementById('root')
 );
 

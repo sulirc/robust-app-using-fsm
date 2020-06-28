@@ -6,9 +6,11 @@ import './App.css';
 function RawFullApp() {
   const [query, setQuery] = useState('');
   const [items, setItems] = useState([]);
+  const [photo, setPhoto] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isCanceled, setIsCanceled] = useState(false);
+  const [isPhotoMode, setIsPhotoMode] = useState(false);
   const booleanRef = useRef();
 
   useEffect(() => {
@@ -16,6 +18,7 @@ function RawFullApp() {
       isLoading,
       isError,
       isCanceled,
+      isPhotoMode
     };
   });
 
@@ -28,30 +31,46 @@ function RawFullApp() {
       return;
     }
 
+    if(booleanRef.current.isPhotoMode) {
+      return;
+    }
+
     setIsError(false);
     setIsLoading(true);
     setIsCanceled(false);
-    fetchDictWordsByTag(query).then(res => {
-      if (booleanRef.current.isCanceled) {
-        return;
-      }
-      setIsLoading(false);
-      setIsError(false);
-      setItems(res.data || []);
-    }).catch(err => {
-      if (booleanRef.current.isCanceled) {
-        return;
-      }
-      console.error(err);
-      setIsLoading(false);
-      setIsError(true);
-    });
+    fetchDictWordsByTag(query)
+      .then(res => {
+        if (booleanRef.current.isCanceled) {
+          return;
+        }
+        setIsLoading(false);
+        setIsError(false);
+        setItems(res.data || []);
+      })
+      .catch(err => {
+        if (booleanRef.current.isCanceled) {
+          return;
+        }
+        console.error(err);
+        setIsLoading(false);
+        setIsError(true);
+      });
   }
 
   function handleCancel(e) {
     setIsError(false);
     setIsLoading(false);
     setIsCanceled(true);
+  }
+
+  function handleItemSelect(item) {
+    setPhoto(item);
+    setIsPhotoMode(true);
+  }
+
+  function handleItemUnselect() {
+    setPhoto({});
+    setIsPhotoMode(false);
   }
 
   return (
@@ -83,13 +102,27 @@ function RawFullApp() {
         )}
       </div>
       {isLoading && <p className="loading-spin">Loading...</p>}
-      <div className="words-container">
-        {items.map(item => (
-          <div className="word-card" key={item.id}>
-            {item.title}
+
+      {isPhotoMode ? (
+        <div className="zoom-container">
+          <div className="word-full-card" onClick={() => handleItemUnselect()}>
+            <p className="title">{photo.title}</p>
+            <p className="desc">{photo.descriptions}</p>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="words-container">
+          {items.map(item => (
+            <div
+              className="word-card"
+              key={item.id}
+              onClick={() => handleItemSelect(item)}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
