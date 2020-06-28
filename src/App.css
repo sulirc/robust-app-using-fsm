@@ -71,6 +71,10 @@
   cursor: pointer;
 }
 
+.word-card:hover {
+  border: 1px solid #333;
+}
+
 .word-card + .word-card {
   margin-left: 4px;
 }
