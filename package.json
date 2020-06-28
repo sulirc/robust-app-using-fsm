@@ -6,6 +6,8 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "@xstate/react": "^0.8.1",
+    "@xstate/test": "^0.4.0",
     "classnames": "^2.2.6",
     "koa": "^2.13.0",
     "react": "^16.13.1",
