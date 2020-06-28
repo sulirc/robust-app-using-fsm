@@ -38,8 +38,6 @@ function App() {
     photo: {},
   });
 
-  console.log(context);
-
   function send(nextState, action) {
     switch (nextState) {
       case 'loading':
