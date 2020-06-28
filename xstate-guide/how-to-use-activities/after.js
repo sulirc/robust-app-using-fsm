@@ -22,7 +22,7 @@ const alarmClockMachine = Machine(
         }
 
         beep()
-        const interval = setTimeout(beep, 1000)
+        const interval = setInterval(beep, 1000)
 
         return () => clearInterval(interval)
       },

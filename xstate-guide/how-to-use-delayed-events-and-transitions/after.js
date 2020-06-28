@@ -48,7 +48,9 @@ const stopLightMachine = Machine(
   {
     id: 'stopLight',
     initial: 'red',
-    context: {},
+    context: {
+      rushHourMultiplier: 2
+    },
     states: {
       red: {
         after: { RED_TIMER: 'yellow' },
