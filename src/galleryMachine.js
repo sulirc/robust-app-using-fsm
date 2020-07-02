@@ -1,83 +1,82 @@
-
 import { fetchDictWordsByTag } from './utils';
 import { Machine, assign } from 'xstate';
 
-const galleryMachineOptions = {
+const options = {
   actions: {
     setQuery: assign({
-      query: (context, event) => event.query,
+      query: (_, event) => event.query,
     }),
     setItems: assign({
-      items: (context, event) => event.data.data,
+      items: (_, event) => event.data,
     }),
     setPhoto: assign({
-      photo: (context, event) => event.item,
+      photo: (_, event) => event.item,
     }),
     unsetPhoto: assign({
-      photo: (context, event) => ({}),
+      photo: () => ({}),
     }),
   },
 };
 
-const galleryMachine = Machine(
-  {
-    id: 'gallery-demo',
-    initial: 'start',
-    context: {
-      items: [],
-      photo: {},
-      query: '',
+const galleryMachine = Machine({
+  id: 'gallery-demo',
+  initial: 'start',
+  context: {
+    items: [],
+    photo: {},
+    query: '',
+  },
+  states: {
+    start: {
+      on: {
+        SEARCH: {
+          target: 'loading',
+          actions: 'setQuery',
+        },
+      },
     },
-    states: {
-      start: {
-        on: {
-          SEARCH: {
-            target: 'loading',
-            actions: 'setQuery',
-          },
+    loading: {
+      invoke: {
+        id: 'fetchDictWordsByTag',
+        src: (context, event) => fetchDictWordsByTag(context.query),
+        onDone: {
+          target: 'gallery',
+          actions: 'setItems',
+        },
+        onError: {
+          target: 'error',
         },
       },
-      loading: {
-        invoke: {
-          id: 'fetchDictWordsByTag',
-          src: (context, event) => fetchDictWordsByTag(context.query),
-          onDone: {
-            target: 'gallery',
-            actions: 'setItems',
-          },
-          onError: {
-            target: 'error',
-          },
+      on: {
+        CANCEL_SEARCH: 'gallery',
+      },
+    },
+    error: {
+      on: {
+        SEARCH: 'loading',
+      },
+    },
+    gallery: {
+      on: {
+        SEARCH: {
+          target: 'loading',
+          actions: 'setQuery',
         },
-        on: {
-          CANCEL_SEARCH: 'gallery',
+        SELECT_PHOTO: {
+          target: 'photo',
+          actions: 'setPhoto',
         },
       },
-      error: {
-        on: {
-          SEARCH: 'loading',
-        },
-      },
-      gallery: {
-        on: {
-          SEARCH: 'loading',
-          SELECT_PHOTO: {
-            target: 'photo',
-            actions: 'setPhoto',
-          },
-        },
-      },
-      photo: {
-        on: {
-          EXIT_PHOTO: {
-            target: 'gallery',
-            actions: 'unsetPhoto',
-          },
+    },
+    photo: {
+      on: {
+        EXIT_PHOTO: {
+          target: 'gallery',
+          actions: 'unsetPhoto',
         },
       },
     },
   },
-  galleryMachineOptions
-);
+}, options);
 
 export default galleryMachine;

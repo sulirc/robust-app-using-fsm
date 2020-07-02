@@ -48,12 +48,13 @@ function isServerNormal() {
   return Math.random() > 0;
 }
 
-export async function fetchDictWordsByTag(tag, delay = 2000) {
-  console.info('try fetching...', new Date())
+export async function fetchDictWordsByTag(tag, delay = 600) {
+  console.log(`Fetch words by tag: ${tag}; `, new Date())
+
   await sleep(delay);
 
   if (isServerNormal()) {
-    return { data: DATABASE.get(tag) };
+    return DATABASE.get(tag);
   } else {
     throw new Error('Server error, please retry later');
   }

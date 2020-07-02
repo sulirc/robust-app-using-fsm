@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMachine } from '@xstate/react';
 import galleryMachine from './galleryMachine';
 import classNames from 'classnames';
@@ -10,16 +10,8 @@ function App() {
     error: 'Try search again',
     start: 'Search',
   };
-  const [state, send, service] = useMachine(galleryMachine);
+  const [state, send] = useMachine(galleryMachine);
   const [query, setQuery] = useState('');
-
-  useEffect(() => {
-    const subscription = service.subscribe(state => {
-      console.log('subscribing gallery state: ', state.value);
-    });
-
-    return subscription.unsubscribe;
-  }, [service]);
 
   function handleCancel(e) {
     send('CANCEL_SEARCH');
@@ -49,13 +41,15 @@ function App() {
 
   return (
     <div className="App">
-      <div className="form-container">
+      <div className="form-container" data-testid="form-screen">
         <input
+          data-testid="search-input"
           type="text"
           placeholder="Search For Words"
           onChange={handleInput}
         />
         <button
+          data-testid="search-button"
           className={classNames('btn-search', {
             'is-loading': state.matches('loading'),
           })}
@@ -64,7 +58,11 @@ function App() {
           {SEARCH_TEXT[state.value] || 'Search'}
         </button>
         {state.matches('loading') && (
-          <button className="btn-cancel" onClick={handleCancel}>
+          <button
+            data-testid="cancel-button"
+            className="btn-cancel"
+            onClick={handleCancel}
+          >
             Cancel
           </button>
         )}
@@ -74,6 +72,7 @@ function App() {
         <div className="words-container">
           {state.context.items.map(item => (
             <div
+              data-testid="word-card"
               className="word-card"
               key={item.id}
               onClick={() => handleItemSelect(item)}
@@ -85,7 +84,11 @@ function App() {
       )}
       {state.matches('photo') && (
         <div className="zoom-container">
-          <div className="word-full-card" onClick={() => handleItemUnselect()}>
+          <div
+            data-testid="word-full-card"
+            className="word-full-card"
+            onClick={() => handleItemUnselect()}
+          >
             <p className="title">{state.context.photo.title}</p>
             <p className="desc">{state.context.photo.descriptions}</p>
           </div>

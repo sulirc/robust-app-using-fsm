@@ -3,16 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
     "@xstate/react": "^0.8.1",
-    "@xstate/test": "^0.4.0",
     "classnames": "^2.2.6",
-    "koa": "^2.13.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
     "xstate": "^4.10.0"
   },
   "scripts": {
@@ -35,5 +29,15 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "@xstate/graph": "^1.1.0",
+    "@xstate/test": "^0.4.0",
+    "chai": "^4.2.0",
+    "puppeteer": "^4.0.1",
+    "react-scripts": "3.4.1"
   }
 }
