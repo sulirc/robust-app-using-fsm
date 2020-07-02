@@ -47,13 +47,11 @@ describe('gallery app', () => {
       loading: {
         invoke: {
           id: 'fetchDictWordsByTag',
-          src: (context, event) => Promise.resolve({
-            data: [{
-              title: 'doggy',
-              description: 'Hello doggy, u are qute',
-              id: '#id'
-            }]
-          }),
+          src: (context, event) => Promise.resolve([{
+            title: 'doggy',
+            description: 'Hello doggy, u are qute',
+            id: '#id'
+          }]),
           onDone: {
             target: 'gallery',
             actions: 'setItems',
@@ -78,7 +76,10 @@ describe('gallery app', () => {
       },
       gallery: {
         on: {
-          SEARCH: 'loading',
+          SEARCH: {
+            target: 'loading',
+            actions: 'setQuery',
+          },
           SELECT_PHOTO: {
             target: 'photo',
             actions: 'setPhoto',

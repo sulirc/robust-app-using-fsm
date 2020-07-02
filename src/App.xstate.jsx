@@ -90,7 +90,7 @@ function App() {
             onClick={() => handleItemUnselect()}
           >
             <p className="title">{state.context.photo.title}</p>
-            <p className="desc">{state.context.photo.descriptions}</p>
+            <p className="desc">{state.context.photo.description}</p>
           </div>
         </div>
       )}

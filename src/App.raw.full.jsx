@@ -107,7 +107,7 @@ function RawFullApp() {
         <div className="zoom-container">
           <div className="word-full-card" onClick={() => handleItemUnselect()}>
             <p className="title">{photo.title}</p>
-            <p className="desc">{photo.descriptions}</p>
+            <p className="desc">{photo.description}</p>
           </div>
         </div>
       ) : (
