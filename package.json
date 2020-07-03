@@ -12,7 +12,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "jest --testRegex app\\.js",
+    "test": "jest --watch --testRegex app\\.js",
+    "test:fsm": "jest --watch --testRegex app\\.xstate\\.js",
+    "test:e2e": "jest --watch --testRegex app\\.e2e\\.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

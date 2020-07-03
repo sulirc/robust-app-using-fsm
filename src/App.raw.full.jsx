@@ -78,7 +78,7 @@ function RawFullApp() {
       <div className="form-container">
         <input
           type="text"
-          placeholder="Search For Words"
+          placeholder="Search words by ur tags"
           onChange={handleInput}
         />
         {isError ? (

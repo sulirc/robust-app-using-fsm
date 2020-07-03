@@ -41,15 +41,18 @@ function App() {
 
   return (
     <div className="App">
-      <div className="form-container" data-testid="form-screen">
+      <div className="form-container">
         <input
-          data-testid="search-input"
           type="text"
-          placeholder="Search For Words"
+          placeholder="Search words by ur tags"
           onChange={handleInput}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              handleSubmit();
+            }
+          }}
         />
         <button
-          data-testid="search-button"
           className={classNames('btn-search', {
             'is-loading': state.matches('loading'),
           })}
@@ -58,11 +61,7 @@ function App() {
           {SEARCH_TEXT[state.value] || 'Search'}
         </button>
         {state.matches('loading') && (
-          <button
-            data-testid="cancel-button"
-            className="btn-cancel"
-            onClick={handleCancel}
-          >
+          <button className="btn-cancel" onClick={handleCancel}>
             Cancel
           </button>
         )}
@@ -72,7 +71,6 @@ function App() {
         <div className="words-container">
           {state.context.items.map(item => (
             <div
-              data-testid="word-card"
               className="word-card"
               key={item.id}
               onClick={() => handleItemSelect(item)}
@@ -84,11 +82,7 @@ function App() {
       )}
       {state.matches('photo') && (
         <div className="zoom-container">
-          <div
-            data-testid="word-full-card"
-            className="word-full-card"
-            onClick={() => handleItemUnselect()}
-          >
+          <div className="word-full-card" onClick={() => handleItemUnselect()}>
             <p className="title">{state.context.photo.title}</p>
             <p className="desc">{state.context.photo.description}</p>
           </div>
