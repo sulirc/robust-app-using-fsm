@@ -129,7 +129,7 @@ function App() {
       </div>
       {galleryState === 'loading' && <p className="loading-spin">Loading...</p>}
       {galleryState === 'gallery' && (
-        <div className="words-container">
+        <div className="words-container" data-testid="words-container">
           {context.items.map(item => (
             <div
               className="word-card"
@@ -142,7 +142,7 @@ function App() {
         </div>
       )}
       {galleryState === 'photo' && (
-        <div className="zoom-container">
+        <div className="zoom-container" data-testid="zoom-containers">
           <div
             className="word-full-card"
             onClick={() => handleItemUnselect()}
