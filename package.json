@@ -41,6 +41,7 @@
     "@testing-library/user-event": "^7.1.2",
     "@xstate/graph": "^1.1.0",
     "@xstate/test": "^0.4.0",
+    "cypress": "^4.9.0",
     "react-scripts": "3.4.1"
   }
 }
