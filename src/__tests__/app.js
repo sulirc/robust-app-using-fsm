@@ -23,12 +23,23 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const wordBuilder = build('words').fields({
+const createFakeWord = build('words').fields({
   id: sequence(s => `card-${s}`),
   title: fake(f => f.lorem.word()),
   description: fake(f => f.lorem.sentence())
 });
 
+async function typeChar(container, tag) {
+  const { getByTestId } = container;
+  const button = getByTestId('btn-search');
+  const input = getByTestId('search-input');
+
+  await userEvent.type(input, tag);
+
+  userEvent.click(button);
+
+  return { button, input };
+}
 
 describe('App `start` state', () => {
   test('App should render search `input` & `button`', () => {
@@ -85,30 +96,45 @@ describe('App `gallery` state', () => {
   let container;
   const tag = 'a';
   const data = [
-    wordBuilder(), wordBuilder()
+    createFakeWord(), createFakeWord()
   ];
-
-  test('search button\'s text should restore to `Search`', async () => {
+  async function renderWords() {
     mockFetchDictWordsByTag.mockResolvedValue(data);
     container = render(<App />);
-    const { button } = await typeChar(container, tag);
-    
+    const typeRet = await typeChar(container, tag);
+
+    return {
+      ...container,
+      ...typeRet
+    };
+  }
+
+  test('search button\'s text should restore to `Search`', async () => {
+    const { button } = await renderWords();
+
     expect(mockFetchDictWordsByTag).toHaveBeenCalledWith(tag);
     expect(mockFetchDictWordsByTag).toHaveBeenCalledTimes(1);
+
     await wait(() => {
       expect(button).toHaveTextContent(/Search$/);
     })
-  })
+  });
+
+  test('ui should have render exactly number of cards', async () => {
+    const { getByTestId } = await renderWords();
+
+    await wait(() => {
+      expect(getByTestId('words-container')).toBeInTheDocument();
+    });
+    expect(getByTestId('words-container').children.length).toEqual(data.length);
+  });
+
+  test('ui should only render words container', async () => {
+    const { getByTestId, queryByTestId } = await renderWords();
+
+    await wait(() => {
+      expect(getByTestId('words-container')).toBeInTheDocument();
+    });
+    expect(queryByTestId('zoom-container')).not.toBeInTheDocument();
+  });
 });
-
-async function typeChar(container, tag) {
-  const { getByTestId } = container;
-  const button = getByTestId('btn-search');
-  const input = getByTestId('search-input');
-
-  await userEvent.type(input, tag);
-
-  userEvent.click(button);
-
-  return { button, input };
-}
