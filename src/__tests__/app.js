@@ -1,13 +1,12 @@
 /**
  * Integration test
  */
-
 import React from 'react';
 import App from '../App.xstate';
-import { render, wait, act } from '@testing-library/react';
+import { render, wait } from '@testing-library/react';
+import { build, fake, sequence } from 'test-data-bot';
 import userEvent from '@testing-library/user-event';
 import { fetchDictWordsByTag as mockFetchDictWordsByTag } from '../utils';
-// import { act } from 'react-dom/test-utils';
 
 // Do not display console log
 jest.mock('../utils')
@@ -23,6 +22,13 @@ afterAll(() => {
 afterEach(() => {
   jest.clearAllMocks();
 });
+
+const wordBuilder = build('words').fields({
+  id: sequence(s => `card-${s}`),
+  title: fake(f => f.lorem.word()),
+  description: fake(f => f.lorem.sentence())
+});
+
 
 describe('App `start` state', () => {
   test('App should render search `input` & `button`', () => {
@@ -75,21 +81,11 @@ describe('App `loading` state', () => {
   });
 });
 
-
 describe('App `gallery` state', () => {
   let container;
   const tag = 'a';
   const data = [
-    {
-      title: 'dog',
-      description: 'That was a pretty good dog',
-      id: '#001'
-    },
-    {
-      title: 'dragon',
-      description: 'Dragon can fly and breathe fire',
-      id: '#002'
-    },
+    wordBuilder(), wordBuilder()
   ];
 
   test('search button\'s text should restore to `Search`', async () => {
