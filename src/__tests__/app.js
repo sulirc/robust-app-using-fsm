@@ -29,7 +29,24 @@ const createFakeWord = build('words').fields({
   description: fake(f => f.lorem.sentence())
 });
 
-async function typeChar(container, tag) {
+const tag = 'a';
+const data = [
+  createFakeWord(), createFakeWord()
+];
+
+async function renderWords(options = { preprocess: () => mockFetchDictWordsByTag.mockResolvedValue(data) }) {
+  options.preprocess();
+
+  const container = render(<App />);
+  const elements = await inputTagsAndSubmit(container, tag);
+
+  return {
+    ...container,
+    ...elements
+  };
+}
+
+async function inputTagsAndSubmit(container, tag) {
   const { getByTestId } = container;
   const button = getByTestId('btn-search');
   const input = getByTestId('search-input');
@@ -51,64 +68,45 @@ describe('App `start` state', () => {
 });
 
 describe('App `loading` state', () => {
-  let container;
-  let button;
-  const tag = 'a';
-
-  beforeEach(async () => {
-    container = render(<App />);
-    const dom = await typeChar(container, tag);
-
-    button = dom.button;
-  });
+  async function renderInput() {
+    return await renderWords({
+      preprocess: () => { }
+    })
+  }
 
   test('search button\'s text should change to `Searching`', async () => {
+    const { button } = await renderInput();
     expect(button).toHaveTextContent(/searching\.{3}/i);
   });
 
   test('ui should display cancel button', async () => {
-    const { queryByTestId } = container;
+    const { queryByTestId } = await renderInput();
     expect(queryByTestId('btn-cancel')).toBeInTheDocument();
   });
 
   test('ui should display loading tips', async () => {
-    const { queryByText } = container;
+    const { queryByText } = await renderInput();
     expect(queryByText(/loading\.{3}/i)).toBeInTheDocument();
   });
 
   test('ui should no display cards-container', async () => {
-    const { queryByTestId } = container;
+    const { queryByTestId } = await renderInput();
     expect(queryByTestId('cards-container')).not.toBeInTheDocument();
   });
 
   test('ui should no display zoom-container', async () => {
-    const { queryByTestId } = container;
+    const { queryByTestId } = await renderInput();
     expect(queryByTestId('zoom-container')).not.toBeInTheDocument();
   });
 
-  test('fetchDictWordsByTag should be trigger once', () => {
+  test('fetchDictWordsByTag should be trigger once', async () => {
+    await renderInput();
     expect(mockFetchDictWordsByTag).toHaveBeenCalledWith(tag);
     expect(mockFetchDictWordsByTag).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('App `gallery` state', () => {
-  let container;
-  const tag = 'a';
-  const data = [
-    createFakeWord(), createFakeWord()
-  ];
-  async function renderWords() {
-    mockFetchDictWordsByTag.mockResolvedValue(data);
-    container = render(<App />);
-    const typeRet = await typeChar(container, tag);
-
-    return {
-      ...container,
-      ...typeRet
-    };
-  }
-
   test('search button\'s text should restore to `Search`', async () => {
     const { button } = await renderWords();
 
