@@ -3,21 +3,12 @@
  */
 import React from 'react';
 import App from '../App.xstate';
-import { render, wait } from '@testing-library/react';
+import { render, wait, act } from '@testing-library/react';
 import { build, fake, sequence } from 'test-data-bot';
-import userEvent from '@testing-library/user-event';
+import user from '@testing-library/user-event';
 import { fetchDictWordsByTag as mockFetchDictWordsByTag } from '../utils';
 
-// Do not display console log
-jest.mock('../utils')
-
-beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation();
-});
-
-afterAll(() => {
-  console.log.mockRestore();
-});
+jest.mock('../utils');
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -34,7 +25,19 @@ const data = [
   createFakeWord(), createFakeWord()
 ];
 
-async function renderWords(options = { preprocess: () => mockFetchDictWordsByTag.mockResolvedValue(data) }) {
+async function renderWords(options = { preprocess: () => mockFetchDictWordsByTag.mockResolvedValueOnce(data) }) {
+  options.preprocess();
+
+  const container = render(<App />);
+  const elements = await inputTagsAndSubmit(container, tag);
+
+  return {
+    ...container,
+    ...elements
+  };
+}
+
+async function renderFailWords(options = { preprocess: () => mockFetchDictWordsByTag.mockRejectedValueOnce(null) }) {
   options.preprocess();
 
   const container = render(<App />);
@@ -51,9 +54,9 @@ async function inputTagsAndSubmit(container, tag) {
   const button = getByTestId('btn-search');
   const input = getByTestId('search-input');
 
-  await userEvent.type(input, tag);
+  await user.type(input, tag);
 
-  userEvent.click(button);
+  user.click(button);
 
   return { button, input };
 }
@@ -135,4 +138,34 @@ describe('App `gallery` state', () => {
     });
     expect(queryByTestId('zoom-container')).not.toBeInTheDocument();
   });
+});
+
+describe('App `error` state', () => {
+  test('search button\'s text should change to `Try search again`', async () => {
+    const { getByText } = await renderFailWords();
+    expect(mockFetchDictWordsByTag).toHaveBeenCalledWith(tag);
+    expect(mockFetchDictWordsByTag).toHaveBeenCalledTimes(1);
+
+    await wait(() => {
+      expect(getByText(/try search again$/i)).toBeInTheDocument();
+    });
+  });
+
+  test('ui can search again when request failed', async () => {
+    const { getByText } = await renderFailWords();
+    await wait(() => {
+      expect(getByText(/try search again$/i)).toBeInTheDocument();
+    });
+    await act(async () => {
+      user.click(getByText(/try search again$/i));
+    });
+    await wait(() => {
+      expect(getByText(/searching\.{3}$/i)).toBeInTheDocument();
+    });
+    expect(getByText(/loading\.{3}/i)).toBeInTheDocument();
+  });
+});
+
+describe('App `photo` state', () => {
+
 });
