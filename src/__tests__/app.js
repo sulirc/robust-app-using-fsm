@@ -167,5 +167,38 @@ describe('App `error` state', () => {
 });
 
 describe('App `photo` state', () => {
+  async function loadPhotoMode(index = 0) {
+    const utility = await renderWords();
+    await wait(() => {
+      expect(utility.getByTestId('words-container')).toBeInTheDocument();
+    });
 
+    const cards = utility.getByTestId('words-container').children;
+
+    user.click(cards[index]);
+    return { ...utility, cards };
+  }
+  test('ui should load photo mode when user click card', async () => {
+    const index = 0;
+    const { getByTestId, cards } = await loadPhotoMode(index);
+    await wait(() => {
+      expect(getByTestId('zoom-container')).toBeInTheDocument();
+    });
+    const fullCardTitle = getByTestId('zoom-container').getElementsByClassName('title')[0];
+    expect(fullCardTitle.textContent).toEqual(cards[index].textContent);
+  });
+
+  test('photo mode should be back to gallery mode when user click photo', async () => {
+    const index = 0;
+    const { queryByTestId, getByTestId } = await loadPhotoMode(index);
+    await wait(() => {
+      expect(getByTestId('zoom-container')).toBeInTheDocument();
+    });
+    const fullCard = getByTestId('zoom-container').getElementsByClassName('word-full-card')[0];
+    user.click(fullCard);
+
+    await wait(() => {
+      expect(queryByTestId('zoom-container')).not.toBeInTheDocument();
+    });
+  });
 });

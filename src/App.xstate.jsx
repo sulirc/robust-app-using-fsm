@@ -83,7 +83,7 @@ function App() {
         </div>
       )}
       {state.matches('photo') && (
-        <div className="zoom-container" data-testid="zoom-containers">
+        <div className="zoom-container" data-testid="zoom-container">
           <div className="word-full-card" onClick={() => handleItemUnselect()}>
             <p className="title">{state.context.photo.title}</p>
             <p className="desc">{state.context.photo.description}</p>
