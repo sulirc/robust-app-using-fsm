@@ -12,26 +12,33 @@
   outline: none;
   font-size: 16px;
   padding: 0 12px;
+  border-radius: 18px;
+  transition: all ease .1s;
 }
 
 .form-container > button {
+  margin-left: 6px;
+  padding: 0 24px;
   border: 1px solid #888;
   color: #444;
   background: #fff;
   outline: none;
-  margin-left: 6px;
+  border-radius: 18px;
+  transition: all ease .1s;
 }
 
 .form-container > button:hover {
-  border: 1px solid darkgreen;
-  color: darkgreen;
+  border: 1px solid #333;
+  background: darkgreen;
+  color: #FFF;
   opacity: 0.8;
 }
 
 .form-container > button.is-loading {
   cursor: not-allowed;
-  border: 1px solid #888;
-  color: #444;
+  background: darkgreen;
+  border: 1px solid #333;
+  color: #FFF;
   opacity: 0.5;
 }
 

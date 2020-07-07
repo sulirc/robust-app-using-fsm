@@ -1,23 +1,6 @@
 import { fetchDictWordsByTag } from './utils';
 import { Machine, assign } from 'xstate';
 
-const options = {
-  actions: {
-    setQuery: assign({
-      query: (_, event) => event.query,
-    }),
-    setItems: assign({
-      items: (_, event) => event.data,
-    }),
-    setPhoto: assign({
-      photo: (_, event) => event.item,
-    }),
-    unsetPhoto: assign({
-      photo: () => ({}),
-    }),
-  },
-};
-
 const galleryMachine = Machine({
   id: 'gallery-demo',
   initial: 'start',
@@ -83,6 +66,21 @@ const galleryMachine = Machine({
       },
     },
   },
-}, options);
+}, {
+  actions: {
+    setQuery: assign({
+      query: (_, event) => event.query,
+    }),
+    setItems: assign({
+      items: (_, event) => event.data,
+    }),
+    setPhoto: assign({
+      photo: (_, event) => event.item,
+    }),
+    unsetPhoto: assign({
+      photo: () => ({}),
+    }),
+  },
+});
 
 export default galleryMachine;

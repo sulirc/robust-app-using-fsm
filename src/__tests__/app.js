@@ -3,16 +3,10 @@
  */
 import React from 'react';
 import App from '../App.xstate';
+import user from '@testing-library/user-event';
 import { render, wait, act } from '@testing-library/react';
 import { build, fake, sequence } from 'test-data-bot';
-import user from '@testing-library/user-event';
 import { fetchDictWordsByTag as mockFetchDictWordsByTag } from '../utils';
-
-jest.mock('../utils');
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
 
 const createFakeWord = build('words').fields({
   id: sequence(s => `card-${s}`),
@@ -24,6 +18,12 @@ const tag = 'a';
 const data = [
   createFakeWord(), createFakeWord()
 ];
+
+jest.mock('../utils');
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 async function renderWords(options = { preprocess: () => mockFetchDictWordsByTag.mockResolvedValueOnce(data) }) {
   options.preprocess();
@@ -55,7 +55,6 @@ async function inputTagsAndSubmit(container, tag) {
   const input = getByTestId('search-input');
 
   await user.type(input, tag);
-
   user.click(button);
 
   return { button, input };
@@ -118,7 +117,7 @@ describe('App `gallery` state', () => {
 
     await wait(() => {
       expect(button).toHaveTextContent(/Search$/);
-    })
+    });
   });
 
   test('ui should have render exactly number of cards', async () => {
