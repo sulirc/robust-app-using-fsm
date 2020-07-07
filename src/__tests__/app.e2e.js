@@ -1,3 +1,3 @@
 /**
- * e2e test with xstate
+ * e2e test
  */

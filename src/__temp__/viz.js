@@ -1,5 +1,8 @@
-import { Machine, assign } from 'xstate';
+/* eslint-disable */
 
+/**
+ * Copy paste to https://xstate.js.org/viz/
+ */
 function sleep(t = 1000) {
   return new Promise(r => setTimeout(r, t));
 }
@@ -7,15 +10,14 @@ function sleep(t = 1000) {
 
 async function fetchDictWordsByTag() {
   await sleep(2000);
+  throw new Error('Server error, please retry later');
   // return [{
   //   title: 'doggy',
   //   description: 'Hello doggy, u are qute',
   //   id: '#id'
   // }];
-  throw new Error('Server error, please retry later');
 }
 
-// eslint-disable-next-line no-unused-vars
 const galleryMachine = Machine({
   id: 'gallery-demo',
   initial: 'start',
