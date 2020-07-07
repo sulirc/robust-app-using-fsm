@@ -7,7 +7,7 @@ export function sleep(t = 1000) {
 }
 
 export async function fetchDictWordsByTag(tag, delay = 2000) {
-  // console.info(`Fetch words by tag: ${tag}; `, new Date())
+  console.info(`Fetch words by tag: ${tag}; `, new Date())
 
   await sleep(delay);
 
