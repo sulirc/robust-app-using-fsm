@@ -76,8 +76,8 @@ function App() {
 
   function search(tag) {
     fetchDictWordsByTag(tag)
-      .then(res => {
-        transition({ type: 'SEARCH_SUCCESS', items: res.data });
+      .then(data => {
+        transition({ type: 'SEARCH_SUCCESS', items: data });
       })
       .catch(err => {
         console.error(err);

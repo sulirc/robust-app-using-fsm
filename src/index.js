@@ -14,10 +14,10 @@ import AppXState from './App.xstate';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
-  // <AppRaw />,
+  <AppRaw />,
   // <AppRawFull />,
   // <App />,
-  <AppXState />,
+  // <AppXState />,
   document.getElementById('root')
 );
 

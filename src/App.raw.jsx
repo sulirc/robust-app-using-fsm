@@ -16,14 +16,16 @@ function RawApp() {
   function handleSubmit(e) {
     setIsError(false);
     setIsLoading(true);
-    fetchDictWordsByTag(query).then(res => {
+    fetchDictWordsByTag(query)
+      .then(data => {
         setIsLoading(false);
-        setItems(res.data || []);
-    }).catch(err => {
-      console.error(err);
-      setIsLoading(false);
-      setIsError(true);
-    });
+        setItems(data);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoading(false);
+        setIsError(true);
+      });
   }
 
   return (

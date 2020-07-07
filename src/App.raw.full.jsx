@@ -18,7 +18,7 @@ function RawFullApp() {
       isLoading,
       isError,
       isCanceled,
-      isPhotoMode
+      isPhotoMode,
     };
   });
 
@@ -31,7 +31,7 @@ function RawFullApp() {
       return;
     }
 
-    if(booleanRef.current.isPhotoMode) {
+    if (booleanRef.current.isPhotoMode) {
       return;
     }
 
@@ -39,13 +39,13 @@ function RawFullApp() {
     setIsLoading(true);
     setIsCanceled(false);
     fetchDictWordsByTag(query)
-      .then(res => {
+      .then(data => {
         if (booleanRef.current.isCanceled) {
           return;
         }
         setIsLoading(false);
         setIsError(false);
-        setItems(res.data || []);
+        setItems(data);
       })
       .catch(err => {
         if (booleanRef.current.isCanceled) {
