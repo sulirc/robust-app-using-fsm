@@ -44,7 +44,6 @@
     "@xstate/graph": "^1.1.0",
     "@xstate/test": "^0.4.0",
     "cypress": "^4.9.0",
-    "jest": "^24.9.0",
     "react-scripts": "3.4.1",
     "test-data-bot": "^0.8.0"
   }

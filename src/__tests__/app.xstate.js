@@ -103,9 +103,9 @@ const galleryMachine = Machine({
         SELECT_PHOTO: {
           target: 'photo',
           actions: 'setPhoto',
-          // cond: (context, _) => {
-          //   return context.items.length > 0;
-          // }
+          cond: (context, _) => {
+            return context.items.length > 0;
+          }
         },
       },
       meta: {
