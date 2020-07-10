@@ -12,10 +12,12 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "cy:run": "cypress run",
+    "cy:open": "cypress open",
     "test": "jest --watch --testRegex app.js",
     "test:e2e": "jest --watch --testRegex app.e2e.js",
-    "test:xstate": "jest --watch --testRegex app.xstate.js",
-    "test:xstate:e2e": "jest --watch --testRegex app.xstate.e2e.js",
+    "test:x": "jest --watch --testRegex app.xstate.js",
+    "test:x:e2e": "jest --watch --testRegex app.xstate.e2e.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -43,7 +45,7 @@
     "@types/jest": "^26.0.4",
     "@xstate/graph": "^1.1.0",
     "@xstate/test": "^0.4.0",
-    "cypress": "^4.9.0",
+    "cypress": "^4.10.0",
     "eslint-plugin-cypress": "^2.11.1",
     "react-scripts": "3.4.1",
     "test-data-bot": "^0.8.0"

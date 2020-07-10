@@ -9,7 +9,7 @@ function RawFullApp() {
   const [photo, setPhoto] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [isCanceled, setIsCanceled] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
   const [isPhotoMode, setIsPhotoMode] = useState(false);
   const booleanRef = useRef();
 
@@ -17,7 +17,7 @@ function RawFullApp() {
     booleanRef.current = {
       isLoading,
       isError,
-      isCanceled,
+      isCancelled,
       isPhotoMode,
     };
   });
@@ -37,10 +37,10 @@ function RawFullApp() {
 
     setIsError(false);
     setIsLoading(true);
-    setIsCanceled(false);
+    setIsCancelled(false);
     fetchDictWordsByTag(query)
       .then(data => {
-        if (booleanRef.current.isCanceled) {
+        if (booleanRef.current.isCancelled) {
           return;
         }
         setIsLoading(false);
@@ -48,7 +48,7 @@ function RawFullApp() {
         setItems(data);
       })
       .catch(err => {
-        if (booleanRef.current.isCanceled) {
+        if (booleanRef.current.isCancelled) {
           return;
         }
         console.error(err);
@@ -60,7 +60,7 @@ function RawFullApp() {
   function handleCancel(e) {
     setIsError(false);
     setIsLoading(false);
-    setIsCanceled(true);
+    setIsCancelled(true);
   }
 
   function handleItemSelect(item) {
