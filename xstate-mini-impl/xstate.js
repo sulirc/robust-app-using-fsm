@@ -39,7 +39,7 @@ export function execActions(state, event) {
 // - 定义三：一个初始状态
 // - 定义四：给定当前状态 + 事件，可以得出下个状态的变换器
 // - 定义五：若干个（或无）的最终状态
-export function createMachine(fsmConfig, options) {
+export function createMachine(fsmConfig, options = {}) {
   function getCombinedActions({ states, initial }) {
     const entryAction = states[initial].entry;
     return toArray(
@@ -123,13 +123,13 @@ export function createMachine(fsmConfig, options) {
                 return true;
               });
 
-            const newState = {
+            return {
               value: target,
               context: nextContext,
               actions: allActions,
               changed: target !== value || allActions.length > 0 || assigned,
               matches: createMatcher(target)
-            }
+            };
           }
 
         }
@@ -144,7 +144,7 @@ export function createMachine(fsmConfig, options) {
 }
 
 // 状态机服务的状态
-const INTERPRETER_STATUS = {
+export const INTERPRETER_STATUS = {
   NotStarted: 0,
   Running: 1,
   Stopped: 2
