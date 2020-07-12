@@ -31,3 +31,7 @@ export function toActionObject(action, actionMap = {}) {
 export function toEventObject(event) {
   return isString(event) ? { type: event } : event;
 }
+
+export function toTransitionObject(transition) {
+  return isString(transition) ? { target: transition } : transition;
+}
