@@ -15,9 +15,8 @@
     "cy:run": "cypress run",
     "cy:open": "cypress open",
     "test": "jest --watch --testRegex app.js",
-    "test:e2e": "jest --watch --testRegex app.e2e.js",
-    "test:x": "jest --watch --testRegex app.xstate.js",
-    "test:x:e2e": "jest --watch --testRegex app.xstate.e2e.js",
+    "test:xst": "jest --watch --testRegex app.xstate.js",
+    "test:xst-impl": "jest --watch --testRegex xstate-mini-impl/__tests__/",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
