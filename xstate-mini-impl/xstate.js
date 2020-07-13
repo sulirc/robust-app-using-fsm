@@ -37,7 +37,7 @@ export function execActions(state, event) {
 // - 定义一：有限的状态
 // - 定义二：有限的事件
 // - 定义三：一个初始状态
-// - 定义四：给定当前状态 + 事件，可以得出下个状态的变换器
+// - 定义四：变换器（给定当前状态 + 事件，可以得出下个状态）
 // - 定义五：若干个（或无）的最终状态
 export function createMachine(fsmConfig, options = {}) {
   function getCombinedActions({ states, initial }) {
