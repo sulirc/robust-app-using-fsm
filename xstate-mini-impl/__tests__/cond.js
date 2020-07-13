@@ -1,4 +1,4 @@
-import { Machine, interpret, INTERPRETER_STATUS } from '../xstate';
+import { Machine, interpret } from '../xstate';
 
 let power = 0;
 const POWER_ENOUGH_FOR_BULB = 100;
