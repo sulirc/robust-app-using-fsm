@@ -43,12 +43,12 @@ describe('light bulb machine cond', () => {
     service = null;
   });
 
-  it('should not change to `lit` state when power zero', () => {
+  it('should not change to `lit` state when power zero (cond false)', () => {
     service.send('TOGGLE');
     expect(service.state.value).toBe('unlit');
   });
 
-  it('should change to `lit` state when power enough', () => {
+  it('should change to `lit` state when power enough (cond true)', () => {
     power = POWER_ENOUGH_FOR_BULB;
     service.send('TOGGLE');
     expect(service.state.value).toBe('lit');

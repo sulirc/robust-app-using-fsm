@@ -11,7 +11,7 @@ const fsmConfig = {
       on: {
         BREAK: 'broken',
         TOGGLE: {
-          target: 'lit',
+          target: 'unlit',
           actions: [() => {
             globalAssigned = '~VALUE';
           }],

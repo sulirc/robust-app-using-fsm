@@ -169,6 +169,8 @@ export function interpret(machine) {
       // 执行当前状态的所有 Action（Action 集合在 Machine 中已进行计算）
       execActions(state, toEventObject(event));
       listeners.forEach((listener) => listener(state));
+
+      return service;
     },
     subscribe: (listener) => {
       listeners.add(listener);
