@@ -155,6 +155,7 @@ export function interpret(machine) {
   let state = machine.initialState;
   let status = INTERPRETER_STATUS.NotStarted;
 
+  // 用以订阅状态机服务
   const listeners = new Set();
   const service = {
     _machine: machine,
@@ -165,6 +166,7 @@ export function interpret(machine) {
       }
       // 通过变换器更新状态
       state = machine.transition(state, event);
+      // 执行当前状态的所有 Action（Action 集合在 Machine 中已进行计算）
       execActions(state, toEventObject(event));
       listeners.forEach((listener) => listener(state));
     },
@@ -176,11 +178,13 @@ export function interpret(machine) {
         unsubscribe: () => listeners.delete(listener)
       };
     },
+    // 状态机服务启动
     start: () => {
       status = INTERPRETER_STATUS.Running;
       execActions(state, INIT_EVENT);
       return service;
     },
+    // 状态机服务暂停
     stop: () => {
       status = INTERPRETER_STATUS.Stopped;
       listeners.clear();
