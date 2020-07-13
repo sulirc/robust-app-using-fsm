@@ -36,8 +36,120 @@ const lightBulbStates = {
 
 ## 定义二：有限的事件
 
+什么是事件？
+
+举个例子：比如说小明心如止水地在工作，突然隔壁同事给了他一巴掌，小明气炸了，准备撸起袖子去打架。
+
+这里小明就是一个状态机，他从**心如止水**的状态，转换到了**气炸了**的状态，全因发生了**被同事扇了一巴掌**的事件，并且产生了**准备去干架**的行为副作用。公式如下：
+
+心如止水（状态） + 被扇一巴掌（事件） = 气炸了（新的状态）+ 准备干架（副作用）。
+
+当然同事之间还是要团结友爱啦，君子动口不动手，我们要以理服人，是吧。
+
+基于上述的例子，我们进行抽象，总结得出公式如下：
+
+```
+state + event = newState + effect
+```
+
+因此，因为状态是有限的，所以当然事件也是有限的。就比如图有三个顶点，点之间的连线如果有向，那也只有六条线（2 ^ 3 = 6），这很好理解。
+
+再结合到我们的灯泡状态机来看，它的事件有如下几种：
+
+```
+unlit + TOGGLE = lit + effect
+lit + TOGGLE = unlit + effect
+unlit + BREAK = broken + effect
+lit + BREAK = broken + effect
+```
+
+我们整理一下，用 JavaScript 对象来表述这个事情：
+
+```js
+const lightBulbEventMap = {
+  unlit: {
+    on: {
+      TOGGLE: 'lit',
+      BREAK: 'broken',
+    },
+  },
+  lit: {
+    on: {
+      TOGGLE: 'unlit',
+      BREAK: 'broken',
+    },
+  },
+  break: {},
+};
+```
+
+这样状态与事件之间的关系就一目了然了。
+
 ## 定义三：一个初始状态
+
+盘古开天、女娲造人、伊甸园里的亚当夏娃，万事万物都有一个初始状态。就像人的一生也会从呱呱落地开始，到化作一抔黄土结束，整个过程是随时间流逝而不断变换的，我们不可能直接绕过开始，直接到中间某个节点。
+
+对于状态机来说也是如此。灯泡买回来一般处于未点亮的状态（正常来说）。因此，我们还是用 JavaScript 对象来表述这个事情：
+
+```js
+const lightBulbMachine = {
+  initial: 'unlit',
+  states: {
+    unlit: {
+      on: {
+        TOGGLE: 'lit',
+        BREAK: 'broken',
+      },
+    },
+    lit: {
+      on: {
+        TOGGLE: 'unlit',
+        BREAK: 'broken',
+      },
+    },
+    break: {},
+  },
+};
+```
 
 ## 定义四：变换器（给定当前状态 + 事件，可以得出下个状态）
 
+其实到这里我们已经把灯泡的状态、事件都定义完了。但我们仍然需要给出变换器的实现，用以实现状态与状态之前的过渡。
+
+变换器实现复杂么？不，一点也不。请看：
+
+```js
+function transition(state, event) {
+  return machine.states[state].on[event];
+}
+```
+
+然后我们可以用变换器函数对灯泡的状态进行运算
+
+```js
+const newState = transition('unlit', 'TOGGLE'); // lit
+```
+
+或者~
+
+```js
+const newState = transition('lit', 'BREAK'); // broken
+```
+
+假如灯泡坏了，我们还是想点亮它，怎么办？
+
+```js
+const newState = transition('broken', 'TOGGLE'); // Throw error
+```
+
+状态机告诉你，痴心妄想！
+
 ## 定义五：若干个（或无）的最终状态
+
+前面说到万事万物都有起点，所以按道理来说，应该也必然有终点。但是考虑到实际应用中，其实抽象来说未必需要一个终点。就比如网站用户可以登录、漫游、退出、再登录、再漫游等等，它并没有一个实际的终点。
+
+但是也可以有终点。比如 Promise 请求，从 init 到 pending，再返回 resolve 代表成功，或者 reject 代表失败。它有两个终点。
+
+比如人从出生到逝去，宏观上来说，分别对应着初始状态、最终状态。
+
+我们还是回到我们的灯泡状态机，broken 就是它的最终状态。状态机一旦抵达到最终的状态，就相当于结束了。
