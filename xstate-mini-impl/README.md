@@ -10,7 +10,9 @@
 
 依据状态机定义进行 xstate 设计。我们逐个分析。
 
-## 定义一：有限的状态
+## 定义解读
+
+### 定义一：有限的状态
 
 状态机之所以这样命名，大略都可以理解为管理“状态”的机器。从工业生产可用性的角度来看，任何事物都是可以**近似**看做有限的状态的。
 
@@ -34,7 +36,7 @@ const lightBulbStates = {
 };
 ```
 
-## 定义二：有限的事件
+### 定义二：有限的事件
 
 什么是事件？
 
@@ -85,7 +87,7 @@ const lightBulbEventMap = {
 
 这样状态与事件之间的关系就一目了然了。
 
-## 定义三：一个初始状态
+### 定义三：一个初始状态
 
 盘古开天、女娲造人、伊甸园里的亚当夏娃，万事万物都有一个初始状态。就像人的一生也会从呱呱落地开始，到化作一抔黄土结束，整个过程是随时间流逝而不断变换的，我们不可能直接绕过开始，直接到中间某个节点。
 
@@ -112,7 +114,7 @@ const lightBulbMachine = {
 };
 ```
 
-## 定义四：变换器（给定当前状态 + 事件，可以得出下个状态）
+### 定义四：变换器（给定当前状态 + 事件，可以得出下个状态）
 
 其实到这里我们已经把灯泡的状态、事件都定义完了。但我们仍然需要给出变换器的实现，用以实现状态与状态之前的过渡。
 
@@ -144,7 +146,7 @@ const newState = transition('broken', 'TOGGLE'); // Throw error
 
 状态机告诉你，痴心妄想！
 
-## 定义五：若干个（或无）的最终状态
+### 定义五：若干个（或无）的最终状态
 
 前面说到万事万物都有起点，所以按道理来说，应该也必然有终点。但是考虑到实际应用中，其实抽象来说未必需要一个终点。就比如网站用户可以登录、漫游、退出、再登录、再漫游等等，它并没有一个实际的终点。
 
@@ -153,3 +155,307 @@ const newState = transition('broken', 'TOGGLE'); // Throw error
 比如人从出生到逝去，宏观上来说，分别对应着初始状态、最终状态。
 
 我们还是回到我们的灯泡状态机，broken 就是它的最终状态。状态机一旦抵达到最终的状态，就相当于结束了。
+
+```js
+const lightBulbMachine = {
+  initial: 'unlit',
+  states: {
+    // ...
+    break: {
+      type: 'final',
+    },
+  },
+};
+```
+
+## 状态机最简单实现
+
+来，让我们实现一个状态机吧！
+
+```js
+function createMachine({ initial, states }) {
+  const machine = {
+    initialState: initial,
+    transition: (state, event) => states[state].on[event]
+  };
+
+  return machine;
+}
+```
+
+同学们肯定会觉得，就这么简单么？其实本质上就这样。但是如此简单的实现，是绝对不能支撑起我们复杂的业务场景需求的。
+
+但是一旦只要明白了本质，扩展的实现理解起来也不会很困难。
+
+## 副作用
+
+上文的状态机实现其实本质上是个纯函数，但我们仔细观察上文提到过的公式。
+
+```
+state + event = newState + effect
+```
+
+关于副作用我们却只字未提。在大型的应用中，副作用是到处存在的，比如网络请求、本地日志存储、错误输出、DOM 操作、数据库写入、事件注册监听。
+
+纯函数可以提高我们代码的质量，但是却不能表达复杂的业务。
+
+状态机也是如此。状态机可以通过注册活动（Activities）、上下文（context）、订阅状态机服务（Service.subscribe）等方式进行表达副作用。
+
+这些都可以去 [XState Docs](https://xstate.js.org/docs/) XState 官网进行学习了解。
+
+## 源码解读
+
+这里贴上了最简单的状态机实现（@xstate/fsm）的注释。除了包含了上述最基本的五个定义、还有扩展上下文（context）、条件守护（cond）、状态机解释服务（service）等。
+
+对状态机更进一步实现感兴趣的同学可以阅读。
+
+```js
+// xstate.js
+import {
+  toTransitionObject, toActionObject, toEventObject, toArray, isString, isFunction
+} from './util';
+
+const INIT_EVENT = { type: 'xstate.init' };
+const ASSIGN_ACTION = 'xstate.assign';
+
+function createMatcher(value) {
+  return stateValue => value === stateValue;
+}
+
+function createUnchangedState(value, context) {
+  return {
+    value,
+    context,
+    actions: [],
+    changed: false,
+    matches: createMatcher(value)
+  };
+}
+
+export function assign(assignment) {
+  return {
+    type: ASSIGN_ACTION,
+    assignment
+  }
+}
+
+export function execActions(state, event) {
+  state.actions.forEach(({ exec }) => {
+    exec && exec(state.context, event);
+  });
+}
+
+// 通过约定的状态机配置，生产一个有限状态机
+// 状态机定义如下：
+// - 定义一：有限的状态
+// - 定义二：有限的事件
+// - 定义三：一个初始状态
+// - 定义四：变换器（给定当前状态 + 事件，可以得出下个状态）
+// - 定义五：若干个（或无）的最终状态
+export function createMachine(fsmConfig, options = {}) {
+  function getCombinedActions({ states, initial }) {
+    const entryAction = states[initial].entry;
+    return toArray(
+      entryAction
+    ).map(action => toActionObject(action, options.actions));
+  }
+
+  function getContext() {
+    return fsmConfig.context || {};
+  }
+
+  const machine = {
+    _options: options,
+    config: fsmConfig,
+    // 实现定义三 - 一个初始状态节点
+    initialState: {
+      // 状态值
+      value: fsmConfig.initial,
+      // 事件
+      actions: getCombinedActions(fsmConfig),
+      // 上下文
+      context: getContext(),
+      // 状态匹配判断方法
+      matches: createMatcher(fsmConfig.initial)
+    },
+    // 实现定义四 - 变换器
+    transition: (state, event) => {
+      const { value, context } = isString(state) ?
+        { value: state, context: getContext() } : state;
+
+      const eventObject = toEventObject(event);
+      const stateConfig = fsmConfig.states[value];
+
+      if (stateConfig.on) {
+        // 根据事件类型取得对应的变换器
+        const transitions = toArray(stateConfig.on[eventObject.type]);
+
+        for (const transtion of transitions) {
+          // 实际上没有任何变换器、或使用 undefined 中断了变换器
+          if (transtion === undefined) {
+            return createUnchangedState(value, context);
+          }
+
+          const { target = value, actions = [], cond = () => true } = toTransitionObject(transtion);
+
+          let nextContext = context;
+
+          // 条件守护，只要满足一个变换器，直接退出
+          if (cond(context, eventObject)) {
+            // 判断上下文是否被修改
+            let assigned = false;
+            // 获取下个状态对象节点
+            const nextStateConfig = fsmConfig.states[target];
+            const allActions = []
+              // 依次进行当前状态的 Exit Action、当前状态的 Action 集合、下个状态的 Entry Action
+              .concat(
+                stateConfig.exit, actions, nextStateConfig.entry
+              )
+              // 过滤假值
+              .filter(a => a)
+              // 寻找 Action 配置，返回统一格式的 Action 对象
+              .map(action => toActionObject(action, machine._options.actions))
+              // 内部事件，支持 assign 函数修改上下文
+              .filter(action => {
+                if (action.type === ASSIGN_ACTION) {
+                  assigned = true;
+
+                  let tmpContext = Object.assign({}, nextContext);
+                  if (isFunction(action.assignment)) {
+                    tmpContext = action.assignment(nextContext, eventObject);
+                  } else {
+                    Object.keys(action.assignment).forEach(key => {
+                      const assignment = action.assignment[key];
+                      tmpContext[key] = isFunction(assignment) ? assignment(nextContext, eventObject) : assignment
+                    });
+                  }
+
+                  nextContext = tmpContext;
+                  return false;
+                }
+                return true;
+              });
+
+            return {
+              value: target,
+              context: nextContext,
+              actions: allActions,
+              changed: target !== value || allActions.length > 0 || assigned,
+              matches: createMatcher(target)
+            };
+          }
+
+        }
+      }
+
+      // 状态节点未注册任何变换器、条件守护未满足，导致停留在原本的状态节点
+      return createUnchangedState(value, context);
+    }
+  };
+
+  return machine;
+}
+
+// 状态机服务的状态
+export const INTERPRETER_STATUS = {
+  NotStarted: 0,
+  Running: 1,
+  Stopped: 2
+};
+
+// 将 Machine 解释为一个状态机服务，应用于实际生产环境
+export function interpret(machine) {
+  let state = machine.initialState;
+  let status = INTERPRETER_STATUS.NotStarted;
+
+  // 用以订阅状态机服务
+  const listeners = new Set();
+  const service = {
+    _machine: machine,
+    send(event) {
+      // 状态机服务未启动时，不允许发送事件
+      if (status !== INTERPRETER_STATUS.Running) {
+        return;
+      }
+      // 通过变换器更新状态
+      state = machine.transition(state, event);
+      // 执行当前状态的所有 Action（Action 集合在 Machine 中已进行计算）
+      execActions(state, toEventObject(event));
+      listeners.forEach((listener) => listener(state));
+
+      return service;
+    },
+    subscribe: (listener) => {
+      listeners.add(listener);
+      listener(state);
+
+      return {
+        unsubscribe: () => listeners.delete(listener)
+      };
+    },
+    // 状态机服务启动
+    start: () => {
+      status = INTERPRETER_STATUS.Running;
+      execActions(state, INIT_EVENT);
+      return service;
+    },
+    // 状态机服务暂停
+    stop: () => {
+      status = INTERPRETER_STATUS.Stopped;
+      listeners.clear();
+      return service;
+    },
+    get state() {
+      return state;
+    },
+    get status() {
+      return status;
+    }
+  };
+
+  return service;
+}
+
+export const Machine = createMachine;
+```
+
+```js
+// util.js
+export function toArray(item) {
+  return item === undefined ? [] : [].concat(item);
+}
+
+export function isString(o) {
+  return typeof o === 'string';
+}
+
+export function isFunction(o) {
+  return typeof o === 'function';
+}
+
+export function toActionObject(action, actionMap = {}) {
+  action = isString(action) && actionMap[action] ?
+    actionMap[action] : action;
+
+  if (isString(action)) {
+    return {
+      type: action
+    };
+  } else if (isFunction(action)) {
+    return {
+      type: action.name,
+      exec: action
+    }
+  } else {
+    return action;
+  }
+}
+
+export function toEventObject(event) {
+  return isString(event) ? { type: event } : event;
+}
+
+export function toTransitionObject(transition) {
+  return isString(transition) ? { target: transition } : transition;
+}
+```
