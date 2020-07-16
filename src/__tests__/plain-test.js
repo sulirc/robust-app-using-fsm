@@ -4,28 +4,36 @@
 import React from 'react';
 import App from '../App.xstate';
 import user from '@testing-library/user-event';
-import { render, wait, act } from '@testing-library/react';
+import { render, wait, act, cleanup } from '@testing-library/react';
 import { build, fake, sequence } from 'test-data-bot';
 import { fetchDictWordsByTag as mockFetchDictWordsByTag } from '../utils';
 
 const createFakeWord = build('words').fields({
   id: sequence(s => `card-${s}`),
   title: fake(f => f.lorem.word()),
-  description: fake(f => f.lorem.sentence())
+  description: fake(f => f.lorem.sentence()),
 });
 
 const tag = 'a';
-const data = [
-  createFakeWord(), createFakeWord()
-];
+const data = [createFakeWord(), createFakeWord()];
 
 jest.mock('../utils');
 
-afterEach(() => {
-  jest.clearAllMocks();
+beforeEach(() => {
+  jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
-async function renderWords(options = { preprocess: () => mockFetchDictWordsByTag.mockResolvedValueOnce(data) }) {
+afterEach(() => {
+  jest.clearAllMocks();
+  console.log.mockRestore();
+  cleanup();
+});
+
+async function renderWords(
+  options = {
+    preprocess: () => mockFetchDictWordsByTag.mockResolvedValueOnce(data),
+  }
+) {
   options.preprocess();
 
   const container = render(<App />);
@@ -33,11 +41,15 @@ async function renderWords(options = { preprocess: () => mockFetchDictWordsByTag
 
   return {
     ...container,
-    ...elements
+    ...elements,
   };
 }
 
-async function renderFailWords(options = { preprocess: () => mockFetchDictWordsByTag.mockRejectedValueOnce(null) }) {
+async function renderFailWords(
+  options = {
+    preprocess: () => mockFetchDictWordsByTag.mockRejectedValueOnce(null),
+  }
+) {
   options.preprocess();
 
   const container = render(<App />);
@@ -45,7 +57,7 @@ async function renderFailWords(options = { preprocess: () => mockFetchDictWordsB
 
   return {
     ...container,
-    ...elements
+    ...elements,
   };
 }
 
@@ -65,18 +77,20 @@ describe('App `start` state', () => {
     const { getByText, getByPlaceholderText } = render(<App />);
 
     expect(getByText(/search/i)).toBeInTheDocument();
-    expect(getByPlaceholderText(/Search words by ur tags/i)).toBeInTheDocument();
+    expect(
+      getByPlaceholderText(/Search words by ur tags/i)
+    ).toBeInTheDocument();
   });
 });
 
 describe('App `loading` state', () => {
   async function renderInput() {
     return await renderWords({
-      preprocess: () => { }
-    })
+      preprocess: () => {},
+    });
   }
 
-  test('search button\'s text should change to `Searching`', async () => {
+  test("search button's text should change to `Searching`", async () => {
     const { button } = await renderInput();
     expect(button).toHaveTextContent(/searching\.{3}/i);
   });
@@ -109,7 +123,7 @@ describe('App `loading` state', () => {
 });
 
 describe('App `gallery` state', () => {
-  test('search button\'s text should restore to `Search`', async () => {
+  test("search button's text should restore to `Search`", async () => {
     const { button } = await renderWords();
 
     expect(mockFetchDictWordsByTag).toHaveBeenCalledWith(tag);
@@ -140,7 +154,7 @@ describe('App `gallery` state', () => {
 });
 
 describe('App `error` state', () => {
-  test('search button\'s text should change to `Try search again`', async () => {
+  test("search button's text should change to `Try search again`", async () => {
     const { getByText } = await renderFailWords();
     expect(mockFetchDictWordsByTag).toHaveBeenCalledWith(tag);
     expect(mockFetchDictWordsByTag).toHaveBeenCalledTimes(1);
@@ -184,7 +198,9 @@ describe('App `photo` state', () => {
     await wait(() => {
       expect(getByTestId('zoom-container')).toBeInTheDocument();
     });
-    const fullCardTitle = getByTestId('zoom-container').getElementsByClassName('title')[0];
+    const fullCardTitle = getByTestId('zoom-container').getElementsByClassName(
+      'title'
+    )[0];
     expect(fullCardTitle.textContent).toEqual(cards[index].textContent);
   });
 
@@ -194,7 +210,9 @@ describe('App `photo` state', () => {
     await wait(() => {
       expect(getByTestId('zoom-container')).toBeInTheDocument();
     });
-    const fullCard = getByTestId('zoom-container').getElementsByClassName('word-full-card')[0];
+    const fullCard = getByTestId('zoom-container').getElementsByClassName(
+      'word-full-card'
+    )[0];
     user.click(fullCard);
 
     await wait(() => {

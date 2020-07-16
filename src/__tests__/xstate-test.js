@@ -108,7 +108,7 @@ let galleryMachine = Machine(
           SELECT_PHOTO: {
             target: 'photo',
             actions: 'setPhoto',
-            cond: ctx =>  ctx.items.length > 0,
+            cond: ctx => ctx.items.length > 0,
           },
         },
         meta: {
@@ -137,7 +137,7 @@ let galleryMachine = Machine(
         },
       },
       // Force xstate test algo to test EXIT_PHOTO
-      'mock-end-fake-{gallery}': {}
+      'mock-end-fake-{gallery}': {},
     },
   },
   {
@@ -249,13 +249,12 @@ describe('gallery app', () => {
   });
 
   it('should have full coverage', () => {
-    console.info('coverage details:\n', galleryModel.getCoverage());
+    // console.info('coverage details:\n', galleryModel.getCoverage());
     return galleryModel.testCoverage({
-      filter: stateNode => !!stateNode.meta
+      filter: stateNode => !!stateNode.meta,
     });
   });
 });
-
 
 function getMockResultByFuturePath(path) {
   const loadingStates = path.segments
