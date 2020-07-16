@@ -3,178 +3,173 @@
  */
 import React from 'react';
 import user from '@testing-library/user-event';
-import { Machine, assign } from 'xstate';
-import { render, wait, act } from '@testing-library/react';
+import { Machine } from 'xstate';
+import { render, wait, act, cleanup } from '@testing-library/react';
 import { build, fake, sequence } from 'test-data-bot';
 import { createModel } from '@xstate/test';
-import { fetchDictWordsByTag } from '../utils';
+import { fetchDictWordsByTag as mockFetchDictWorksByTag } from '../utils';
 import App from '../App.xstate';
 
 const createFakeWord = build('words').fields({
-  id: sequence(s => `card-${s}`),
+  id: sequence(s => `FAKE_CARD_ID_${s}`),
   title: fake(f => f.lorem.word()),
   description: fake(f => f.lorem.sentence()),
 });
 
-const tag = 'a';
-const data = [createFakeWord(), createFakeWord()];
+const FAKE_TAG = 'FAKE_TAG_NAME';
+const FAKE_DATA = [createFakeWord(), createFakeWord()];
 
 jest.mock('../utils');
 
 beforeEach(() => {
-  fetchDictWordsByTag.mockResolvedValue(data);
+  jest.spyOn(console, 'log').mockImplementation(() => {})
+  // mockResolvedValueOnce(FAKE_DATA);
+  mockFetchDictWorksByTag.mockImplementation(() => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(FAKE_DATA);
+      }, 1000);
+    });
+  });
 });
 
 afterEach(() => {
   jest.clearAllMocks();
+  console.log.mockRestore()
+  cleanup();
 });
 
-const galleryMachine = Machine(
-  {
-    id: 'gallery-demo',
-    initial: 'start',
-    context: {
-      items: [],
-      photo: {},
-      query: '',
+let galleryMachine = Machine({
+  id: 'gallery-demo',
+  initial: 'start',
+  context: {
+    items: [],
+    photo: {},
+    query: '',
+  },
+  states: {
+    start: {
+      on: {
+        SEARCH: {
+          target: 'loading',
+        },
+      },
+      meta: {
+        test: async ({ getByTestId }) => {
+          expect(getByTestId('btn-search')).toHaveTextContent(/search$/i);
+        },
+      },
     },
-    states: {
-      start: {
-        on: {
-          SEARCH: {
-            target: 'loading',
-            actions: 'setQuery',
-          },
+    loading: {
+      invoke: {
+        id: 'fetchDictWordsByTag',
+        src: 'fetchService',
+        onDone: {
+          target: 'gallery',
         },
-        meta: {
-          test: async ({ getByTestId }) => {
-            expect(getByTestId('btn-search')).toHaveTextContent(/search$/i);
-          },
+        onError: {
+          target: 'error',
         },
       },
-      loading: {
-        invoke: {
-          id: 'fetchDictWordsByTag',
-          src: (context, event) => fetchDictWordsByTag(context.query),
-          onDone: {
-            target: 'gallery',
-            actions: 'setItems',
-          },
-          onError: {
-            target: 'error',
-          },
-        },
-        on: {
-          CANCEL_SEARCH: 'gallery',
-        },
-        meta: {
-          test: async ({ getByText }) => {
-            await wait(() => {
-              expect(getByText(/loading\.\.\.$/i)).toBeInTheDocument();
-            });
-          },
+      on: {
+        CANCEL_SEARCH: [
+          { target: 'gallery', cond: ctx => ctx.items.length > 0 },
+          { target: 'start' },
+        ],
+      },
+      meta: {
+        test: async ({ getByText }) => {
+          await wait(() => {
+            // expect(getByText(/loading\.\.\.$/i)).toBeInTheDocument();
+          });
         },
       },
-      error: {
-        on: {
-          SEARCH: {
-            target: 'loading',
-            actions: 'setQuery',
-          },
+    },
+    error: {
+      on: {
+        SEARCH: {
+          target: 'loading',
         },
-        meta: {
-          test: async ({ getByText }) => {
-            expect(fetchDictWordsByTag).toHaveBeenCalledWith(tag);
-            expect(fetchDictWordsByTag).toHaveBeenCalledTimes(1);
+      },
+      meta: {
+        test: async ({ getByText }) => {
+          expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
+          expect(mockFetchDictWorksByTag).toHaveBeenCalledTimes(1);
 
-            await wait(() => {
-              expect(getByText(/try search again/i)).toBeInTheDocument();
-            });
-          },
+          await wait(() => {
+            // expect(getByText(/try search again/i)).toBeInTheDocument();
+          });
         },
       },
-      gallery: {
-        on: {
-          SEARCH: {
-            target: 'loading',
-            actions: 'setQuery',
-          },
-          SELECT_PHOTO: {
-            target: 'photo',
-            actions: 'setPhoto',
-            cond: (context, _) => {
-              return context.items.length > 0;
-            },
-          },
+    },
+    gallery: {
+      on: {
+        SEARCH: {
+          target: 'loading',
         },
-        meta: {
-          test: async ({ getByTestId }) => {
-            expect(fetchDictWordsByTag).toHaveBeenCalledWith(tag);
-            expect(fetchDictWordsByTag).toHaveBeenCalledTimes(1);
+        SELECT_PHOTO: {
+          target: 'photo',
+          cond: ctx => ctx.items.length > 0
+        },
+      },
+      meta: {
+        test: async ({ getByTestId }) => {
+          expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
+          expect(mockFetchDictWorksByTag).toHaveBeenCalledTimes(1);
 
-            await wait(() => {
-              expect(getByTestId('words-container')).toBeInTheDocument();
-              expect(getByTestId('zoom-container')).not.toBeInTheDocument();
-            });
-          },
+          await wait(() => {
+            expect(getByTestId('words-container')).toBeInTheDocument();
+          });
         },
       },
-      photo: {
-        on: {
-          EXIT_PHOTO: {
-            target: 'gallery',
-            actions: 'unsetPhoto',
-          },
+    },
+    photo: {
+      on: {
+        EXIT_PHOTO: {
+          target: 'gallery',
         },
-        meta: {
-          test: async ({ getByTestId }) => {
-            await wait(() => {
-              expect(getByTestId('words-container')).not.toBeInTheDocument();
-              expect(getByTestId('zoom-container')).toBeInTheDocument();
-            });
-          },
+      },
+      meta: {
+        test: async ({ getByTestId }) => {
+          await wait(() => {
+            expect(getByTestId('zoom-container')).toBeInTheDocument();
+          });
         },
       },
     },
   },
-  {
-    actions: {
-      setQuery: assign({
-        query: (_, event) => event.query,
-      }),
-      setItems: assign({
-        items: (_, event) => event.data,
-      }),
-      setPhoto: assign({
-        photo: (_, event) => event.item,
-      }),
-      unsetPhoto: assign({
-        photo: () => ({}),
-      }),
-    },
-  }
-);
+});
 
-// Create the model
 const galleryModel = createModel(galleryMachine).withEvents({
-  SEARCH: async ({ getByTestId }) => {
-    const button = getByTestId('btn-search');
-    const input = getByTestId('search-input');
+  SEARCH: {
+    exec: async ({ getByTestId }) => {
+      const button = getByTestId('btn-search');
+      const input = getByTestId('search-input');
 
-    await user.type(input, tag);
-    await act(async () => {
-      user.click(button);
-    });
+      await act(async () => {
+        await user.type(input, FAKE_TAG);
+        user.click(button);
+      });
+    },
   },
-  CANCEL_SEARCH: async () => {},
-  SELECT_PHOTO: async () => {},
-  EXIT_PHOTO: async () => {},
+  CANCEL_SEARCH: {
+    exec: async ({ getByTestId }) => {
+      const button = getByTestId('btn-cancel');
+
+      act(() => {
+        user.click(button);
+      });
+    },
+  },
   'done.invoke.fetchDictWordsByTag': {
-    exec: async () => {},
-    cases: [{ type: 'done.invoke.fetchDictWordsByTag', data }],
+    exec: () => {},
+    cases: [
+      { type: 'done.invoke.fetchDictWordsByTag', data: FAKE_DATA },
+      // { type: 'done.invoke.fetchDictWordsByTag', data: [] },
+    ],
   },
   'error.platform.fetchDictWordsByTag': {
-    exec: async () => {},
+    exec: () => {},
     cases: [
       {
         type: 'error.platform.fetchDictWordsByTag',
@@ -182,22 +177,43 @@ const galleryModel = createModel(galleryMachine).withEvents({
       },
     ],
   },
+  SELECT_PHOTO: {
+    exec: async ({ getByTestId }) => {
+      const container = getByTestId('words-container');
+
+      act(() => {
+        if (container.children.length > 0) {
+          user.click(container.children[0]);
+        }
+      });
+    },
+  },
+  EXIT_PHOTO: {
+    exec: async ({ getByTestId }) => {
+      const container = getByTestId('zoom-container');
+      act(() => {
+        user.click(container.children[0]);
+      });
+    },
+  },
 });
 
-// Create test plans and run the tests with coverage
 describe('gallery app', () => {
-  const testPlans = galleryModel.getShortestPathPlans();
+  // getSimplePathPlans
+  // getShortestPathPlans
+  const testPlans = galleryModel.getSimplePathPlans();
 
   testPlans.forEach(plan => {
     plan.paths.forEach(path => {
-      test(path.description, () => {
+      it(path.description, async () => {
         const container = render(<App />);
-        path.test(container);
+        await path.test(container);
       });
     });
   });
 
-  // test('should have full coverage', () => {
-  //   return galleryModel.testCoverage();
-  // });
+  it('should have full coverage', () => {
+    console.info('coverage details:\n', galleryModel.getCoverage());
+    return galleryModel.testCoverage();
+  });
 });

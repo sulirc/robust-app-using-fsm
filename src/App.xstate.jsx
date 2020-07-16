@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMachine } from '@xstate/react';
 import galleryMachine from './galleryMachine';
 import classNames from 'classnames';
@@ -10,8 +10,17 @@ function App() {
     error: 'Try search again',
     start: 'Search',
   };
-  const [state, send] = useMachine(galleryMachine);
+  const [state, send, service] = useMachine(galleryMachine);
   const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    const subscription = service.subscribe((state) => {
+      // simple state logging
+      console.log(state);
+    });
+  
+    return subscription.unsubscribe;
+  }, [service]); // note: service should never change
 
   function handleCancel(e) {
     send('CANCEL_SEARCH');

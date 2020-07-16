@@ -21,7 +21,7 @@ const galleryMachine = Machine({
     loading: {
       invoke: {
         id: 'fetchDictWordsByTag',
-        src: (context, event) => fetchDictWordsByTag(context.query),
+        src: (context, _) => fetchDictWordsByTag(context.query),
         onDone: {
           target: 'gallery',
           actions: 'setItems',
@@ -31,7 +31,10 @@ const galleryMachine = Machine({
         },
       },
       on: {
-        CANCEL_SEARCH: 'gallery',
+        CANCEL_SEARCH: [
+          { target: 'gallery', cond: ctx => ctx.items.length > 0 },
+          { target: 'start' },
+        ],
       },
     },
     error: {
@@ -51,9 +54,7 @@ const galleryMachine = Machine({
         SELECT_PHOTO: {
           target: 'photo',
           actions: 'setPhoto',
-          cond: (context, _) => {
-            return context.items.length > 0;
-          }
+          cond: ctx => ctx.items.length > 0
         },
       },
     },
@@ -69,10 +70,10 @@ const galleryMachine = Machine({
 }, {
   actions: {
     setQuery: assign({
-      query: (_, event) => event.query,
+      query: (_, event) => event.query
     }),
     setItems: assign({
-      items: (_, event) => event.data,
+      items: (_, event) => event.data
     }),
     setPhoto: assign({
       photo: (_, event) => event.item,
