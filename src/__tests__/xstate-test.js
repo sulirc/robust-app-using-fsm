@@ -75,10 +75,8 @@ let galleryMachine = Machine(
           ],
         },
         meta: {
-          test: async ({ getByText }) => {
-            await wait(() => {
-              expect(getByText(/loading\.\.\.$/i)).toBeInTheDocument();
-            });
+          test: ({ getByText }) => {
+            expect(getByText(/loading\.\.\.$/i)).toBeInTheDocument();
           },
         },
       },
@@ -90,12 +88,9 @@ let galleryMachine = Machine(
           },
         },
         meta: {
-          test: async ({ getByText }) => {
+          test: ({ getByText }) => {
             expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
-
-            await wait(() => {
-              expect(getByText(/try search again/i)).toBeInTheDocument();
-            });
+            expect(getByText(/try search again/i)).toBeInTheDocument();
           },
         },
       },
@@ -112,12 +107,9 @@ let galleryMachine = Machine(
           },
         },
         meta: {
-          test: async ({ getByTestId }) => {
+          test: ({ getByTestId }) => {
             expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
-
-            await wait(() => {
-              expect(getByTestId('words-container')).toBeInTheDocument();
-            });
+            expect(getByTestId('words-container').children).toHaveLength(FAKE_DATA.length);
           },
         },
       },
@@ -129,10 +121,8 @@ let galleryMachine = Machine(
           },
         },
         meta: {
-          test: async ({ getByTestId }) => {
-            await wait(() => {
-              expect(getByTestId('zoom-container')).toBeInTheDocument();
-            });
+          test: ({ getByTestId }) => {
+            expect(getByTestId('zoom-container').children).toHaveLength(1);
           },
         },
       },
@@ -186,20 +176,26 @@ const galleryModel = createModel(galleryMachine).withEvents({
     },
   },
   'done.invoke.fetchDictWordsByTag': {
-    exec: () => {},
+    exec: async ({ findByTestId }) => {
+      await findByTestId('words-container');
+    },
     cases: [{ type: 'done.invoke.fetchDictWordsByTag', data: FAKE_DATA }],
   },
   'error.platform.fetchDictWordsByTag': {
-    exec: () => {},
+    exec: async ({ findByText }) => {
+      await findByText(/try search again/i);
+    },
     cases: [{ type: 'error.platform.fetchDictWordsByTag', data: ERROR_MSG }],
   },
   SELECT_PHOTO: {
-    exec: async ({ getByTestId }) => {
+    exec: async ({ getByTestId, findByTestId }) => {
       const container = getByTestId('words-container');
 
       await act(async () => {
         user.click(container.children[0]);
       });
+      
+      await findByTestId('zoom-container');
     },
     cases: [{ type: 'SELECT_PHOTO', item: FAKE_DATA[0] }],
   },
