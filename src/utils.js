@@ -6,7 +6,7 @@ export function sleep(t = 1000) {
   return new Promise(r => setTimeout(r, t));
 }
 
-export async function fetchDictWordsByTag(tag, delay = 2000) {
+export async function fetchDictWordsByTag(tag, delay = 300) {
   console.info(`Fetch words by tag: ${tag}; `, new Date())
 
   await sleep(delay);

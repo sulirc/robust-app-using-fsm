@@ -9,6 +9,7 @@ import { build, fake, sequence } from 'test-data-bot';
 import { createModel } from '@xstate/test';
 import { fetchDictWordsByTag as mockFetchDictWorksByTag } from '../utils';
 import App from '../App.xstate';
+import fs from 'fs';
 
 const createFakeWord = build('words').fields({
   id: sequence(s => `FAKE_CARD_ID_${s}`),
@@ -31,141 +32,128 @@ afterEach(() => {
   cleanup();
 });
 
-let galleryMachine = Machine({
-  id: 'gallery-demo',
-  initial: 'start',
-  context: {
-    items: [],
-    photo: {},
-    query: '',
-  },
-  states: {
-    start: {
-      on: {
-        SEARCH: {
-          target: 'loading',
-          actions: 'setQuery',
-        },
-      },
-      meta: {
-        test: async ({ getByTestId }) => {
-          expect(getByTestId('btn-search')).toHaveTextContent(/search$/i);
-        },
-      },
+let galleryMachine = Machine(
+  {
+    id: 'gallery-demo',
+    initial: 'start',
+    context: {
+      items: [],
+      photo: {},
+      query: '',
     },
-    loading: {
-      invoke: {
-        id: 'fetchDictWordsByTag',
-        src: 'fetchService',
-        onDone: {
-          target: 'gallery',
-          actions: 'setItems',
+    states: {
+      start: {
+        on: {
+          SEARCH: {
+            target: 'loading',
+            actions: 'setQuery',
+          },
         },
-        onError: {
-          target: 'error',
-        },
-      },
-      on: {
-        CANCEL_SEARCH: [
-          { target: 'gallery', cond: ctx => ctx.items.length > 0 },
-          { target: 'start' },
-        ],
-      },
-      meta: {
-        test: async ({ getByText }) => {
-          await wait(() => {
-            expect(getByText(/loading\.\.\.$/i)).toBeInTheDocument();
-          });
+        meta: {
+          test: async ({ getByTestId }) => {
+            expect(getByTestId('btn-search')).toHaveTextContent(/search$/i);
+          },
         },
       },
-    },
-    error: {
-      on: {
-        SEARCH: {
-          target: 'loading',
-          actions: 'setQuery',
+      loading: {
+        invoke: {
+          id: 'fetchDictWordsByTag',
+          src: 'fetchService',
+          onDone: {
+            target: 'gallery',
+            actions: 'setItems',
+          },
+          onError: {
+            target: 'error',
+          },
         },
-      },
-      meta: {
-        test: async ({ getByText }) => {
-          mockFetchDictWorksByTag.mockImplementation(() => {
-            return new Promise((resolve, reject) => {
-              setTimeout(() => {
-                reject(null);
-              }, 1000);
+        on: {
+          CANCEL_SEARCH: [
+            { target: 'gallery', cond: ctx => ctx.items.length > 0 },
+            { target: 'start' },
+          ],
+        },
+        meta: {
+          test: async ({ getByText }) => {
+            await wait(() => {
+              expect(getByText(/loading\.\.\.$/i)).toBeInTheDocument();
             });
-          });
-          expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
-          expect(mockFetchDictWorksByTag).toHaveBeenCalledTimes(1);
+          },
+        },
+      },
+      error: {
+        on: {
+          SEARCH: {
+            target: 'loading',
+            actions: 'setQuery',
+          },
+        },
+        meta: {
+          test: async ({ getByText }) => {
+            expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
 
-          await wait(() => {
-            expect(getByText(/try search again/i)).toBeInTheDocument();
-          });
-        },
-      },
-    },
-    gallery: {
-      on: {
-        SEARCH: {
-          target: 'loading',
-          actions: 'setQuery',
-        },
-        SELECT_PHOTO: {
-          target: 'photo',
-          actions: 'setPhoto',
-          cond: ctx => ctx.items.length > 0,
-        },
-      },
-      meta: {
-        test: async ({ getByTestId }) => {
-          mockFetchDictWorksByTag.mockImplementation(() => {
-            return new Promise(resolve => {
-              setTimeout(() => {
-                resolve(FAKE_DATA);
-              }, 1000);
+            await wait(() => {
+              expect(getByText(/try search again/i)).toBeInTheDocument();
             });
-          });
-          expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
-          expect(mockFetchDictWorksByTag).toHaveBeenCalledTimes(1);
+          },
+        },
+      },
+      gallery: {
+        on: {
+          SEARCH: {
+            target: 'loading',
+            actions: 'setQuery',
+          },
+          SELECT_PHOTO: {
+            target: 'photo',
+            actions: 'setPhoto',
+            cond: ctx => ctx.items.length > 0,
+          },
+        },
+        meta: {
+          test: async ({ getByTestId }) => {
+            expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
 
-          await wait(() => {
-            expect(getByTestId('words-container')).toBeInTheDocument();
-          });
+            await wait(() => {
+              expect(getByTestId('words-container')).toBeInTheDocument();
+            });
+          },
         },
       },
-    },
-    photo: {
-      on: {
-        EXIT_PHOTO: {
-          target: 'gallery',
-          actions: 'unsetPhoto',
+      photo: {
+        on: {
+          EXIT_PHOTO: {
+            target: 'gallery',
+            actions: 'unsetPhoto',
+          },
         },
-      },
-      meta: {
-        test: async ({ getByTestId }) => {
-          await wait(() => {
-            expect(getByTestId('zoom-container')).toBeInTheDocument();
-          });
+        meta: {
+          test: async ({ getByTestId }) => {
+            await wait(() => {
+              expect(getByTestId('zoom-container')).toBeInTheDocument();
+            });
+          },
         },
       },
     },
   },
-}, {
-  actions: {
-    setQuery: assign({
-      query: (_, event) => event.query
-    }),
-    setItems: assign({
-      items: (_, event) => event.data
-    }),
-    setPhoto: assign({
-      photo: (_, event) => event.item,
-    }),
-    unsetPhoto: assign({
-      photo: () => ({}),
-    }),
-  },
-});
+  {
+    actions: {
+      setQuery: assign({
+        query: (_, event) => event.query,
+      }),
+      setItems: assign({
+        items: (_, event) => event.data,
+      }),
+      setPhoto: assign({
+        photo: (_, event) => event.item,
+      }),
+      unsetPhoto: assign({
+        photo: () => ({}),
+      }),
+    },
+  }
+);
 
 const galleryModel = createModel(galleryMachine).withEvents({
   SEARCH: {
@@ -190,9 +178,7 @@ const galleryModel = createModel(galleryMachine).withEvents({
   },
   'done.invoke.fetchDictWordsByTag': {
     exec: () => {},
-    cases: [
-      { type: 'done.invoke.fetchDictWordsByTag', data: FAKE_DATA },
-    ],
+    cases: [{ type: 'done.invoke.fetchDictWordsByTag', data: FAKE_DATA }],
   },
   'error.platform.fetchDictWordsByTag': {
     exec: () => {},
@@ -208,15 +194,14 @@ const galleryModel = createModel(galleryMachine).withEvents({
       const container = getByTestId('words-container');
 
       act(() => {
-        if (container.children.length > 0) {
-          user.click(container.children[0]);
-        }
+        user.click(container.children[0]);
       });
     },
   },
   EXIT_PHOTO: {
     exec: async ({ getByTestId }) => {
       const container = getByTestId('zoom-container');
+      
       act(() => {
         user.click(container.children[0]);
       });
@@ -232,6 +217,35 @@ describe('gallery app', () => {
   testPlans.forEach(plan => {
     plan.paths.forEach(path => {
       it(path.description, async () => {
+        let mock = 0;
+        const loadingState = path.segments
+          .map((segment, i) => {
+            const v = segment.state.value;
+            if (v === 'loading') {
+              return { value: v, index: i };
+            }
+          })
+          .filter(Boolean);
+        const totalEventTypes = path.segments.map(s => s.event.type);
+
+        mockFetchDictWorksByTag.mockImplementation(() => {
+          return new Promise((resolve, reject) => {
+            // Delay for display loading UI
+            setTimeout(() => {
+              try {
+                const type = totalEventTypes[loadingState[mock++].index];
+                if (type === 'error.platform.fetchDictWordsByTag') {
+                  reject(null);
+                } else {
+                  resolve(FAKE_DATA);
+                }
+              } catch {
+                resolve(FAKE_DATA);
+              }
+            }, 100);
+          });
+        });
+
         const container = render(<App />);
         await path.test(container);
       });

@@ -16,7 +16,7 @@ function App() {
   useEffect(() => {
     const subscription = service.subscribe((state) => {
       // simple state logging
-      console.log(state);
+      console.log(state.value);
     });
   
     return subscription.unsubscribe;
