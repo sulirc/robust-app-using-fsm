@@ -12,8 +12,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "jest --watch --testRegex plain",
-    "test:xst": "jest --watch --testRegex xstate",
+    "test": "jest --watch --testRegex plain-test",
+    "test:xst": "jest --watch --testRegex xstate-test",
     "test:xst-impl": "jest --watch --verbose --testRegex xstate-mini-impl/__tests__/",
     "eject": "react-scripts eject"
   },
