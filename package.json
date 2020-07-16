@@ -12,8 +12,6 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "cy:run": "cypress run",
-    "cy:open": "cypress open",
     "test": "jest --watch --testRegex app.js",
     "test:xst": "jest --watch --testRegex app.xstate.js",
     "test:xst-impl": "jest --watch --verbose --testRegex xstate-mini-impl/__tests__/",
@@ -44,7 +42,6 @@
     "@types/jest": "^26.0.4",
     "@xstate/graph": "^1.1.0",
     "@xstate/test": "^0.4.0",
-    "cypress": "^4.10.0",
     "eslint-plugin-cypress": "^2.11.1",
     "react-scripts": "3.4.1",
     "test-data-bot": "^0.8.0"
