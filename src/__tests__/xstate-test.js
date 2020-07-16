@@ -19,6 +19,7 @@ const createFakeWord = build('words').fields({
 
 const FAKE_TAG = 'FAKE_TAG_NAME';
 const FAKE_DATA = [createFakeWord(), createFakeWord()];
+const ERROR_MSG = 'Server error, please retry later';
 
 jest.mock('../utils');
 
@@ -107,7 +108,7 @@ let galleryMachine = Machine(
           SELECT_PHOTO: {
             target: 'photo',
             actions: 'setPhoto',
-            cond: ctx => ctx.items.length > 0,
+            cond: ctx =>  ctx.items.length > 0,
           },
         },
         meta: {
@@ -123,7 +124,7 @@ let galleryMachine = Machine(
       photo: {
         on: {
           EXIT_PHOTO: {
-            target: 'gallery',
+            target: 'mock-end-fake-{gallery}',
             actions: 'unsetPhoto',
           },
         },
@@ -135,6 +136,8 @@ let galleryMachine = Machine(
           },
         },
       },
+      // Force xstate test algo to test EXIT_PHOTO
+      'mock-end-fake-{gallery}': {}
     },
   },
   {
@@ -166,12 +169,18 @@ const galleryModel = createModel(galleryMachine).withEvents({
         user.click(button);
       });
     },
+    cases: [
+      {
+        type: 'SEARCH',
+        query: FAKE_TAG,
+      },
+    ],
   },
   CANCEL_SEARCH: {
     exec: async ({ getByTestId }) => {
       const button = getByTestId('btn-cancel');
 
-      act(() => {
+      await act(async () => {
         user.click(button);
       });
     },
@@ -182,27 +191,23 @@ const galleryModel = createModel(galleryMachine).withEvents({
   },
   'error.platform.fetchDictWordsByTag': {
     exec: () => {},
-    cases: [
-      {
-        type: 'error.platform.fetchDictWordsByTag',
-        data: 'Server error, please retry later',
-      },
-    ],
+    cases: [{ type: 'error.platform.fetchDictWordsByTag', data: ERROR_MSG }],
   },
   SELECT_PHOTO: {
     exec: async ({ getByTestId }) => {
       const container = getByTestId('words-container');
 
-      act(() => {
+      await act(async () => {
         user.click(container.children[0]);
       });
     },
+    cases: [{ type: 'SELECT_PHOTO', item: FAKE_DATA[0] }],
   },
   EXIT_PHOTO: {
     exec: async ({ getByTestId }) => {
       const container = getByTestId('zoom-container');
-      
-      act(() => {
+
+      await act(async () => {
         user.click(container.children[0]);
       });
     },
@@ -218,22 +223,13 @@ describe('gallery app', () => {
     plan.paths.forEach(path => {
       it(path.description, async () => {
         let mock = 0;
-        const loadingState = path.segments
-          .map((segment, i) => {
-            const v = segment.state.value;
-            if (v === 'loading') {
-              return { value: v, index: i };
-            }
-          })
-          .filter(Boolean);
-        const totalEventTypes = path.segments.map(s => s.event.type);
-
+        const { loadingStates, events } = getMockResultByFuturePath(path);
         mockFetchDictWorksByTag.mockImplementation(() => {
           return new Promise((resolve, reject) => {
             // Delay for display loading UI
             setTimeout(() => {
               try {
-                const type = totalEventTypes[loadingState[mock++].index];
+                const type = events[loadingStates[mock++].index];
                 if (type === 'error.platform.fetchDictWordsByTag') {
                   reject(null);
                 } else {
@@ -254,6 +250,22 @@ describe('gallery app', () => {
 
   it('should have full coverage', () => {
     console.info('coverage details:\n', galleryModel.getCoverage());
-    return galleryModel.testCoverage();
+    return galleryModel.testCoverage({
+      filter: stateNode => !!stateNode.meta
+    });
   });
 });
+
+
+function getMockResultByFuturePath(path) {
+  const loadingStates = path.segments
+    .map((segment, i) => {
+      const v = segment.state.value;
+      if (v === 'loading') {
+        return { value: v, index: i };
+      }
+    })
+    .filter(Boolean);
+  const events = path.segments.map(s => s.event.type);
+  return { loadingStates, events };
+}
