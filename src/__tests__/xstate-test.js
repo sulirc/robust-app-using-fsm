@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import user from '@testing-library/user-event';
-import { Machine } from 'xstate';
+import { Machine, assign } from 'xstate';
 import { render, wait, act, cleanup } from '@testing-library/react';
 import { build, fake, sequence } from 'test-data-bot';
 import { createModel } from '@xstate/test';
@@ -22,20 +22,12 @@ const FAKE_DATA = [createFakeWord(), createFakeWord()];
 jest.mock('../utils');
 
 beforeEach(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {})
-  // mockResolvedValueOnce(FAKE_DATA);
-  mockFetchDictWorksByTag.mockImplementation(() => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(FAKE_DATA);
-      }, 1000);
-    });
-  });
+  jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
 afterEach(() => {
   jest.clearAllMocks();
-  console.log.mockRestore()
+  console.log.mockRestore();
   cleanup();
 });
 
@@ -52,6 +44,7 @@ let galleryMachine = Machine({
       on: {
         SEARCH: {
           target: 'loading',
+          actions: 'setQuery',
         },
       },
       meta: {
@@ -66,6 +59,7 @@ let galleryMachine = Machine({
         src: 'fetchService',
         onDone: {
           target: 'gallery',
+          actions: 'setItems',
         },
         onError: {
           target: 'error',
@@ -80,7 +74,7 @@ let galleryMachine = Machine({
       meta: {
         test: async ({ getByText }) => {
           await wait(() => {
-            // expect(getByText(/loading\.\.\.$/i)).toBeInTheDocument();
+            expect(getByText(/loading\.\.\.$/i)).toBeInTheDocument();
           });
         },
       },
@@ -89,15 +83,23 @@ let galleryMachine = Machine({
       on: {
         SEARCH: {
           target: 'loading',
+          actions: 'setQuery',
         },
       },
       meta: {
         test: async ({ getByText }) => {
+          mockFetchDictWorksByTag.mockImplementation(() => {
+            return new Promise((resolve, reject) => {
+              setTimeout(() => {
+                reject(null);
+              }, 1000);
+            });
+          });
           expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
           expect(mockFetchDictWorksByTag).toHaveBeenCalledTimes(1);
 
           await wait(() => {
-            // expect(getByText(/try search again/i)).toBeInTheDocument();
+            expect(getByText(/try search again/i)).toBeInTheDocument();
           });
         },
       },
@@ -106,14 +108,23 @@ let galleryMachine = Machine({
       on: {
         SEARCH: {
           target: 'loading',
+          actions: 'setQuery',
         },
         SELECT_PHOTO: {
           target: 'photo',
-          cond: ctx => ctx.items.length > 0
+          actions: 'setPhoto',
+          cond: ctx => ctx.items.length > 0,
         },
       },
       meta: {
         test: async ({ getByTestId }) => {
+          mockFetchDictWorksByTag.mockImplementation(() => {
+            return new Promise(resolve => {
+              setTimeout(() => {
+                resolve(FAKE_DATA);
+              }, 1000);
+            });
+          });
           expect(mockFetchDictWorksByTag).toHaveBeenCalledWith(FAKE_TAG);
           expect(mockFetchDictWorksByTag).toHaveBeenCalledTimes(1);
 
@@ -127,6 +138,7 @@ let galleryMachine = Machine({
       on: {
         EXIT_PHOTO: {
           target: 'gallery',
+          actions: 'unsetPhoto',
         },
       },
       meta: {
@@ -137,6 +149,21 @@ let galleryMachine = Machine({
         },
       },
     },
+  },
+}, {
+  actions: {
+    setQuery: assign({
+      query: (_, event) => event.query
+    }),
+    setItems: assign({
+      items: (_, event) => event.data
+    }),
+    setPhoto: assign({
+      photo: (_, event) => event.item,
+    }),
+    unsetPhoto: assign({
+      photo: () => ({}),
+    }),
   },
 });
 
@@ -165,7 +192,6 @@ const galleryModel = createModel(galleryMachine).withEvents({
     exec: () => {},
     cases: [
       { type: 'done.invoke.fetchDictWordsByTag', data: FAKE_DATA },
-      // { type: 'done.invoke.fetchDictWordsByTag', data: [] },
     ],
   },
   'error.platform.fetchDictWordsByTag': {
