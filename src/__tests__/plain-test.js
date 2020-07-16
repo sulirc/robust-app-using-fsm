@@ -177,6 +177,7 @@ describe('App `photo` state', () => {
     user.click(cards[index]);
     return { ...utility, cards };
   }
+
   test('ui should load photo mode when user click card', async () => {
     const index = 0;
     const { getByTestId, cards } = await loadPhotoMode(index);
