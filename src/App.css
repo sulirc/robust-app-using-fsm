@@ -12,26 +12,33 @@
   outline: none;
   font-size: 16px;
   padding: 0 12px;
+  border-radius: 18px;
+  transition: all ease .1s;
 }
 
 .form-container > button {
+  margin-left: 6px;
+  padding: 0 24px;
   border: 1px solid #888;
   color: #444;
-  background: #FFF;
+  background: #fff;
   outline: none;
-  margin-left: 6px;
+  border-radius: 18px;
+  transition: all ease .1s;
 }
 
 .form-container > button:hover {
-  border: 1px solid darkgreen;
-  color: darkgreen;
+  border: 1px solid #333;
+  background: darkgreen;
+  color: #FFF;
   opacity: 0.8;
 }
 
 .form-container > button.is-loading {
   cursor: not-allowed;
-  border: 1px solid #888;
-  color: #444;
+  background: darkgreen;
+  border: 1px solid #333;
+  color: #FFF;
   opacity: 0.5;
 }
 
@@ -54,24 +61,54 @@
 .words-container {
   display: flex;
   justify-content: center;
+  margin: 0 10px;
 }
 
 .word-card {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 4px;
   padding: 10px 40px;
   min-height: 60px;
   font-size: 24px;
-  background: #EEE;
+  background: #eee;
   font-family: serif;
   font-style: italic;
+  border: 1px solid #888;
+  cursor: pointer;
+}
+
+.word-card:hover {
+  border: 1px solid #333;
+}
+
+.word-card + .word-card {
+  margin-left: 4px;
 }
 
 .word-card:nth-child(2n) {
   flex-grow: 1;
 }
+
+.word-full-card {
+  margin: 10px;
+  background: #eee;
+  border: 1px solid #aaa;
+  padding: 10px 20px;
+  font-family: serif;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.word-full-card > .title {
+  margin: 10px 0;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.word-full-card > .desc {
+  font-size: 16px;
+} 
 
 .loading-spin {
   text-align: center;

@@ -35,6 +35,7 @@ function App() {
   const [query, setQuery] = useState('');
   const [context, setContext] = useState({
     items: [],
+    photo: {},
   });
 
   function send(nextState, action) {
@@ -75,10 +76,11 @@ function App() {
 
   function search(tag) {
     fetchDictWordsByTag(tag)
-      .then(res => {
-        transition({ type: 'SEARCH_SUCCESS', items: res.data });
+      .then(data => {
+        transition({ type: 'SEARCH_SUCCESS', items: data });
       })
       .catch(err => {
+        console.error(err);
         transition({ type: 'SEARCH_FAILURE' });
       });
   }
@@ -88,9 +90,15 @@ function App() {
   }
 
   function handleSubmit(e) {
-    e.persist();
-    e.preventDefault();
     transition({ type: 'SEARCH', query });
+  }
+
+  function handleItemSelect(item) {
+    transition({ type: 'SELECT_PHOTO', item });
+  }
+
+  function handleItemUnselect() {
+    transition({ type: 'EXIT_PHOTO', item: {} });
   }
 
   function handleInput(e) {
@@ -102,7 +110,7 @@ function App() {
       <div className="form-container">
         <input
           type="text"
-          placeholder="Search For Words"
+          placeholder="Search words by ur tags"
           onChange={handleInput}
         />
         <button
@@ -120,13 +128,30 @@ function App() {
         )}
       </div>
       {galleryState === 'loading' && <p className="loading-spin">Loading...</p>}
-      <div className="words-container">
-        {context.items.map(item => (
-          <div className="word-card" key={item.id}>
-            {item.title}
+      {galleryState === 'gallery' && (
+        <div className="words-container">
+          {context.items.map(item => (
+            <div
+              className="word-card"
+              key={item.id}
+              onClick={() => handleItemSelect(item)}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+      {galleryState === 'photo' && (
+        <div className="zoom-container">
+          <div
+            className="word-full-card"
+            onClick={() => handleItemUnselect()}
+          >
+            <p className="title">{context.photo.title}</p>
+            <p className="desc">{context.photo.description}</p>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       <p className="current-state">Current state: {galleryState}</p>
     </div>

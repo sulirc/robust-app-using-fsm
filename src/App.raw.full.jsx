@@ -6,16 +6,19 @@ import './App.css';
 function RawFullApp() {
   const [query, setQuery] = useState('');
   const [items, setItems] = useState([]);
+  const [photo, setPhoto] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [isCanceled, setIsCanceled] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
+  const [isPhotoMode, setIsPhotoMode] = useState(false);
   const booleanRef = useRef();
 
   useEffect(() => {
     booleanRef.current = {
       isLoading,
       isError,
-      isCanceled,
+      isCancelled,
+      isPhotoMode,
     };
   });
 
@@ -28,21 +31,24 @@ function RawFullApp() {
       return;
     }
 
+    if (booleanRef.current.isPhotoMode) {
+      return;
+    }
+
     setIsError(false);
     setIsLoading(true);
-    setIsCanceled(false);
+    setIsCancelled(false);
     fetchDictWordsByTag(query)
-      .then(res => {
-        // console.log('boolean flags', isError, isLoading, isCanceled);
-        if (booleanRef.current.isCanceled) {
+      .then(data => {
+        if (booleanRef.current.isCancelled) {
           return;
         }
         setIsLoading(false);
         setIsError(false);
-        setItems(res.data || []);
+        setItems(data);
       })
       .catch(err => {
-        if (booleanRef.current.isCanceled) {
+        if (booleanRef.current.isCancelled) {
           return;
         }
         console.error(err);
@@ -54,7 +60,17 @@ function RawFullApp() {
   function handleCancel(e) {
     setIsError(false);
     setIsLoading(false);
-    setIsCanceled(true);
+    setIsCancelled(true);
+  }
+
+  function handleItemSelect(item) {
+    setPhoto(item);
+    setIsPhotoMode(true);
+  }
+
+  function handleItemUnselect() {
+    setPhoto({});
+    setIsPhotoMode(false);
   }
 
   return (
@@ -62,7 +78,7 @@ function RawFullApp() {
       <div className="form-container">
         <input
           type="text"
-          placeholder="Search For Words"
+          placeholder="Search words by ur tags"
           onChange={handleInput}
         />
         {isError ? (
@@ -86,13 +102,27 @@ function RawFullApp() {
         )}
       </div>
       {isLoading && <p className="loading-spin">Loading...</p>}
-      <div className="words-container">
-        {items.map(item => (
-          <div className="word-card" key={item.id}>
-            {item.title}
+
+      {isPhotoMode ? (
+        <div className="zoom-container">
+          <div className="word-full-card" onClick={() => handleItemUnselect()}>
+            <p className="title">{photo.title}</p>
+            <p className="desc">{photo.description}</p>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="words-container">
+          {items.map(item => (
+            <div
+              className="word-card"
+              key={item.id}
+              onClick={() => handleItemSelect(item)}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

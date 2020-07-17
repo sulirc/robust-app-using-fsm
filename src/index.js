@@ -8,12 +8,16 @@ import AppRaw from './App.raw';
 import AppRawFull from './App.raw.full';
 // FSM demo
 import App from './App';
+// XState demo
+import AppXState from './App.xstate';
+
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   // <AppRaw />,
-  <AppRawFull />,
+  // <AppRawFull />,
   // <App />,
+  <AppXState />,
   document.getElementById('root')
 );
 

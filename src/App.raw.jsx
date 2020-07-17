@@ -14,15 +14,12 @@ function RawApp() {
   }
 
   function handleSubmit(e) {
-    e.persist();
-    e.preventDefault();
-
     setIsError(false);
     setIsLoading(true);
     fetchDictWordsByTag(query)
-      .then(res => {
+      .then(data => {
         setIsLoading(false);
-        setItems(res.data || []);
+        setItems(data);
       })
       .catch(err => {
         console.error(err);
@@ -36,7 +33,7 @@ function RawApp() {
       <div className="form-container">
         <input
           type="text"
-          placeholder="Search For Words"
+          placeholder="Search words by ur tags"
           onChange={handleInput}
         />
         {isError ? (
@@ -50,7 +47,7 @@ function RawApp() {
             })}
             onClick={handleSubmit}
           >
-            { isLoading ? 'Searching...' : 'Search' }
+            {isLoading ? 'Searching...' : 'Search'}
           </button>
         )}
       </div>
