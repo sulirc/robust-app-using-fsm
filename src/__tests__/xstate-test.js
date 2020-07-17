@@ -5,17 +5,10 @@ import React from 'react';
 import user from '@testing-library/user-event';
 import { Machine, assign } from 'xstate';
 import { render, wait, act, cleanup } from '@testing-library/react';
-import { build, fake, sequence } from 'test-data-bot';
 import { createModel } from '@xstate/test';
 import { fetchDictWordsByTag as mockFetchDictWorksByTag } from '../utils';
+import { createFakeWord } from './util';
 import App from '../App.xstate';
-import fs from 'fs';
-
-const createFakeWord = build('words').fields({
-  id: sequence(s => `FAKE_CARD_ID_${s}`),
-  title: fake(f => f.lorem.word()),
-  description: fake(f => f.lorem.sentence()),
-});
 
 const FAKE_TAG = 'FAKE_TAG_NAME';
 const FAKE_DATA = [createFakeWord(), createFakeWord()];
@@ -33,7 +26,7 @@ afterEach(() => {
   cleanup();
 });
 
-let galleryMachine = Machine(
+const galleryMachine = Machine(
   {
     id: 'gallery-demo',
     initial: 'start',

@@ -5,14 +5,8 @@ import React from 'react';
 import App from '../App.xstate';
 import user from '@testing-library/user-event';
 import { render, wait, act, cleanup } from '@testing-library/react';
-import { build, fake, sequence } from 'test-data-bot';
+import { createFakeWord } from './util';
 import { fetchDictWordsByTag as mockFetchDictWordsByTag } from '../utils';
-
-const createFakeWord = build('words').fields({
-  id: sequence(s => `card-${s}`),
-  title: fake(f => f.lorem.word()),
-  description: fake(f => f.lorem.sentence()),
-});
 
 const tag = 'a';
 const data = [createFakeWord(), createFakeWord()];

@@ -12,10 +12,11 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "test:xst-impl": "jest --watch --verbose --testRegex xstate-mini-impl/__tests__/",
     "test": "jest --watch --testRegex plain-test",
     "test:xst": "jest --watch --testRegex xstate-test",
-    "test:xst-impl": "jest --watch --verbose --testRegex xstate-mini-impl/__tests__/",
-    "e2e": "jest -c jest-e2e.config.js --watch --testRegex e2e-test",
+    "e2e": "jest -c jest-e2e.config.js --watch --testRegex plain-e2e-test",
+    "e2e:xst": "jest -c jest-e2e.config.js --watch --testRegex xstate-e2e-test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
