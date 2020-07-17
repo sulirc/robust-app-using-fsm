@@ -1,4 +1,4 @@
-import 'expect-puppeteer'
+import 'expect-puppeteer';
 
 describe('Google', () => {
   beforeAll(async () => {

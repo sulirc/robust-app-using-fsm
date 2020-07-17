@@ -41,6 +41,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@types/jest": "^26.0.4",
+    "@types/jest-environment-puppeteer": "^4.3.2",
     "@types/puppeteer": "^3.0.1",
     "@xstate/graph": "^1.1.0",
     "@xstate/test": "^0.4.0",
