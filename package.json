@@ -15,6 +15,7 @@
     "test": "jest --watch --testRegex plain-test",
     "test:xst": "jest --watch --testRegex xstate-test",
     "test:xst-impl": "jest --watch --verbose --testRegex xstate-mini-impl/__tests__/",
+    "e2e": "jest -c jest-e2e.config.js --watch --testRegex e2e-test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -40,9 +41,13 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@types/jest": "^26.0.4",
+    "@types/puppeteer": "^3.0.1",
     "@xstate/graph": "^1.1.0",
     "@xstate/test": "^0.4.0",
     "eslint-plugin-cypress": "^2.11.1",
+    "jest-environment-node": "^26.1.0",
+    "jest-puppeteer": "^4.4.0",
+    "puppeteer": "^5.1.0",
     "react-scripts": "3.4.1",
     "test-data-bot": "^0.8.0"
   }
